@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.user.dto;
+package com.gradapptracker.backend.user.dto;
 
 public class UserResponse {
     private Integer userId;

@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.document.dto;
+package com.gradapptracker.backend.document.dto;
 
 /**
  * DTO for updating a document. All fields optional.

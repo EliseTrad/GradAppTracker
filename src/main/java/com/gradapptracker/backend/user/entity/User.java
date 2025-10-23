@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.user.entity;
+package com.gradapptracker.backend.user.entity;
 
 import com.gradapptracker.backend.document.entity.Document;
 import com.gradapptracker.backend.program.entity.Program;

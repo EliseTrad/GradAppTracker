@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.exception;
+package com.gradapptracker.backend.exception;
 
 /**
  * DocumentReferencedException indicates a document (or other entity) cannot be

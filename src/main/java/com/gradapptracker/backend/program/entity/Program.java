@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.program.entity;
+package com.gradapptracker.backend.program.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.document.repository;
+package com.gradapptracker.backend.document.repository;
 
 import java.util.List;
 import java.util.Optional;

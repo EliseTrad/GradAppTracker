@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.programdocument.dto;
+package com.gradapptracker.backend.programdocument.dto;
 
 import lombok.Data;
 
@@ -18,4 +18,3 @@ public class ProgramDocumentDTO {
     private String usageNotes;
 
 }
-

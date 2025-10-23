@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.gradapptracker</groupId>
@@ -10,12 +11,15 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.1.6</version>
-    <relativePath /> <!-- lookup parent from repository -->
+    <relativePath />
   </parent>
 
   <properties>
     <java.version>17</java.version>
     <jjwt.version>0.11.5</jjwt.version>
+    <javafx.version>20</javafx.version>
+    <!-- Using 'win' classifier for Windows native JavaFX artifacts. If you run on another OS, change this to 'linux' or 'mac' as appropriate. -->
+    <javafx.platform>win</javafx.platform>
   </properties>
 
   <dependencies>
@@ -37,7 +41,7 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
-    <!-- JJWT (API + impl + jackson) -->
+    <!-- JJWT -->
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
@@ -56,14 +60,14 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Postgres driver -->
+    <!-- Postgres -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>42.6.0</version>
     </dependency>
 
-    <!-- Devtools (optional) -->
+    <!-- Devtools -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
@@ -71,7 +75,7 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Lombok (optional) -->
+    <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -80,20 +84,46 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Test -->
+    <!-- Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- JavaFX -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- OS detection plugin for JavaFX -->
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.7.0</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>detect</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
+
+      <!-- Compiler -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -110,7 +140,12 @@
           </annotationProcessorPaths>
         </configuration>
       </plugin>
+
+      <!-- Spring Boot -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
-
 </project>

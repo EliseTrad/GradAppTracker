@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.exception;
+package com.gradapptracker.backend.exception;
 
 /**
  * UnauthorizedException indicates authentication or simple authorization

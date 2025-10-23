@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.programdocument.dto;
+package com.gradapptracker.backend.programdocument.dto;
 
 import lombok.Data;
 
@@ -10,5 +10,12 @@ public class ProgramDocumentUpdateDTO {
 
     private String usageNotes;
 
-}
+    public String getUsageNotes() {
+        return usageNotes;
+    }
 
+    public void setUsageNotes(String usageNotes) {
+        this.usageNotes = usageNotes;
+    }
+
+}

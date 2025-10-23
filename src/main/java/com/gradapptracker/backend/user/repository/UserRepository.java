@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.user.repository;
+package com.gradapptracker.backend.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

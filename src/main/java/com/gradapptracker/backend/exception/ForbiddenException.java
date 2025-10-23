@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.exception;
+package com.gradapptracker.backend.exception;
 
 /**
  * ForbiddenException indicates the current principal is not allowed to perform

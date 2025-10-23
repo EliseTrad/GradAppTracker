@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.document.service;
+package com.gradapptracker.backend.document.service;
 
 import com.gradapptracker.backend.programdocument.repository.ProgramDocumentRepository;
 import com.gradapptracker.backend.document.dto.DocumentResponseDTO;

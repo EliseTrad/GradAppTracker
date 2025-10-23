@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.security;
+package com.gradapptracker.backend.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

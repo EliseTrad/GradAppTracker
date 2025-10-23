@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.exception;
+package com.gradapptracker.backend.exception;
 
 /**
  * EmailAlreadyExistsException is a domain-specific conflict used when a user

@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.user.controller;
+package com.gradapptracker.backend.user.controller;
 
 import com.gradapptracker.backend.user.dto.LoginResponseDTO;
 import com.gradapptracker.backend.user.dto.UserLoginRequest;

@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.program.service;
+package com.gradapptracker.backend.program.service;
 
 import com.gradapptracker.backend.program.dto.ProgramCreateDTO;
 import com.gradapptracker.backend.program.dto.ProgramDTO;

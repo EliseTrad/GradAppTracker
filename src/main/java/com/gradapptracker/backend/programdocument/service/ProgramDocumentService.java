@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.programdocument.service;
+package com.gradapptracker.backend.programdocument.service;
 
 import com.gradapptracker.backend.document.entity.Document;
 import com.gradapptracker.backend.document.repository.DocumentRepository;

@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.programdocument.repository;
+package com.gradapptracker.backend.programdocument.repository;
 
 import com.gradapptracker.backend.programdocument.entity.ProgramDocument;
 import org.springframework.data.jpa.repository.JpaRepository;

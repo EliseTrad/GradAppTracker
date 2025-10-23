@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.user.service;
+package com.gradapptracker.backend.user.service;
 
 import java.util.regex.Pattern;
 

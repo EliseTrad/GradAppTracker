@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.exception;
+package com.gradapptracker.backend.exception;
 
 /**
  * ValidationException indicates the request failed input or business

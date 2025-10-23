@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.shared.dto;
+package com.gradapptracker.backend.shared.dto;
 
 import java.util.List;
 

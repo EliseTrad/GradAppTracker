@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.document.controller;
+package com.gradapptracker.backend.document.controller;
 
 import com.gradapptracker.backend.document.dto.DocumentResponseDTO;
 import com.gradapptracker.backend.document.dto.DocumentUpdateDTO;

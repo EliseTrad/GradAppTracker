@@ -1,4 +1,4 @@
-﻿package com.gradapptracker.backend.document.dto;
+package com.gradapptracker.backend.document.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -13,6 +13,8 @@ public class DocumentCreateDTO {
     private String docType;
 
     private String notes;
+
+    private String fileName;
 
     public DocumentCreateDTO() {
     }
@@ -32,5 +34,12 @@ public class DocumentCreateDTO {
     public void setNotes(String notes) {
         this.notes = notes;
     }
-}
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+}

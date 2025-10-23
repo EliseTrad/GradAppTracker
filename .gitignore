@@ -1,0 +1,66 @@
+# Maven
+/target/
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+
+# IDEs
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Gradle
+/.gradle/
+/build/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Environment files
+.env
+
+# Runtime and uploads
+/uploads/
+*.db
+*.sqlite
+
+# Local application config with secrets (do not commit)
+/src/main/resources/application.properties
+
+# Others
+.mvn/wrapper/maven-wrapper.jar
+
+# Ignore IntelliJ folders
+out/
+
+# JetBrains
+.idea/
+
+# temporary files
+*.tmp
+*.swp
+
+# coverage
+coverage/
+
+# logstash
+logstash-*

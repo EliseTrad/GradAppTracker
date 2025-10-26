@@ -39,22 +39,33 @@ CREATE DATABASE gradapptracker;
 
 ```powershell
 # runs psql against local Postgres; adjust host/port/username as needed
-psql -U postgres -d gradapptracker -f schema.sql
+psql -U <db_user> -d gradapptracker -f schema.sql
 ```
 
-3. Default connection properties are set in
-   `src/main/resources/application.properties`. The defaults used in this
-   project are:
+3. Configure connection properties in
+   `src/main/resources/application.properties` using environment variables (no
+   secrets committed):
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:3001/gradapptracker
-spring.datasource.username=postgres
-spring.datasource.password=elise
-upload.dir=uploads
-spring.profiles.active=dev
+# Database (uses env vars with sensible defaults; override via environment)
+spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:gradapptracker}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+
+# App storage and profile
+upload.dir=${UPLOAD_DIR:uploads}
+spring.profiles.active=${SPRING_PROFILES_ACTIVE:dev}
 ```
 
-Adjust those values for your environment before running the backend.
+Set environment variables before running the app (PowerShell example):
+
+```powershell
+$env:DB_HOST="localhost"; $env:DB_PORT="3001"; $env:DB_NAME="gradapptracker"
+$env:DB_USER="postgres";  $env:DB_PASSWORD="<your-password>"
+```
+
+Note: Never commit real credentials to the repository. Prefer environment
+variables or a local, ignored override file.
 
 ### Build
 

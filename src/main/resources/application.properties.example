@@ -1,0 +1,73 @@
+###############################################
+# GradAppTracker - application.properties (example)
+#
+# Copy this file to:
+#   src/main/resources/application.properties
+# and customize values OR set the corresponding
+# environment variables shown in ${...} placeholders.
+#
+# NOTE: Do NOT commit real credentials. Keep the
+# actual application.properties file in .gitignore.
+###############################################
+
+############################
+# Database (PostgreSQL)
+############################
+# Defaults target a local Postgres. Override with env vars:
+# DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD.
+spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:gradapptracker}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO:update}
+spring.jpa.show-sql=${JPA_SHOW_SQL:true}
+spring.jpa.properties.hibernate.format_sql=${JPA_FORMAT_SQL:false}
+
+# Optional HikariCP tuning
+spring.datasource.hikari.maximum-pool-size=${DB_POOL_SIZE:10}
+
+############################
+# Server
+############################
+server.port=${SERVER_PORT:8080}
+
+############################
+# File uploads & storage
+############################
+# Use a single consistent variable
+app.upload.dir=${UPLOAD_DIR:uploads}
+spring.servlet.multipart.max-file-size=${MAX_FILE_SIZE:5MB}
+spring.servlet.multipart.max-request-size=${MAX_REQUEST_SIZE:10MB}
+
+############################
+# Profiles
+############################
+spring.profiles.active=${SPRING_PROFILES_ACTIVE:dev}
+
+############################
+# JSON / Dates
+############################
+# Use ISO-8601 for dates instead of timestamps on the backend
+spring.jackson.serialization.write-dates-as-timestamps=false
+
+############################
+# Security (JWT)
+############################
+# Set via environment variables
+app.jwt.secret=${JWT_SECRET:change-me}
+app.jwt.expirationMs=${JWT_EXPIRATION_MS:3600000}
+
+###############################################
+# Local Development Hints (Bash / PowerShell)
+#
+# Linux / macOS:
+# export DB_HOST="localhost"; export DB_PORT="5432"; export DB_NAME="gradapptracker"
+# export DB_USER="postgres"; export DB_PASSWORD="<your-password>"
+# export UPLOAD_DIR="./uploads"; export SPRING_PROFILES_ACTIVE="dev"
+#
+# Windows PowerShell:
+# $env:DB_HOST="localhost"; $env:DB_PORT="5432"; $env:DB_NAME="gradapptracker"
+# $env:DB_USER="postgres"; $env:DB_PASSWORD="<your-password>"
+# $env:UPLOAD_DIR="uploads"; $env:SPRING_PROFILES_ACTIVE="dev"
+###############################################

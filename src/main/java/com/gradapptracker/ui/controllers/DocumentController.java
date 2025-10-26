@@ -571,8 +571,8 @@ public class DocumentController {
             if (filePath != null && !filePath.isEmpty()) {
                 File file = new File(filePath);
                 if (file.exists()) {
-                    // Open containing folder
-                    java.awt.Desktop.getDesktop().open(file.getParentFile());
+                    // Open containing folder using the shared helper so the method is used
+                    openFileWithDefaultApp(file.getParentFile());
                 } else {
                     AlertUtils.warn("File Not Found", "The document file could not be found on disk.");
                 }

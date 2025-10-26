@@ -8,77 +8,55 @@ import com.gradapptracker.backend.user.dto.UserUpdateRequest;
 
 import java.net.http.HttpResponse;
 
-/**
- * UI-facing service for user operations (login/register) that talks to the
- * backend API and stores authentication into {@link UserSession} on success.
- */
 public class UserServiceFx extends ApiClient {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * Login with email and password. On success stores token and userId in
-     * {@link UserSession}.
-     *
-     * @param email    user's email
-     * @param password user's password
-     */
-    public void login(String email, String password) {
+    // ----------------- LOGIN -----------------
+    public AuthResult login(String email, String password) {
         try {
             String json = String.format("{\"email\":\"%s\",\"password\":\"%s\"}",
                     escape(email), escape(password));
-            HttpResponse<String> resp = POST("/auth/login", json, false);
+            HttpResponse<String> resp = POST("/users/login", json, false);
             int status = resp.statusCode();
             String body = resp.body();
-            if (status == 200) {
+
+            if (status / 100 == 2) {
                 JsonNode node = mapper.readTree(body);
                 String token = node.path("token").asText(null);
-                Integer userId = node.path("userId").isMissingNode() ? null : node.path("userId").asInt();
-                if (token == null) {
-                    throw new RuntimeException("Login failed: missing token in response");
-                }
-                UserSession.getInstance().login(userId, email, token);
-                return;
-            } else if (status == 401) {
-                throw new RuntimeException("Invalid credentials");
+                int userId = node.path("user").path("userId").asInt();
+                return new AuthResult(true, "Login successful", token, userId);
             } else {
-                throw new RuntimeException("Login failed: " + body);
+                String message = extractBackendErrorMessage(body);
+                return new AuthResult(false, message, null, null);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new AuthResult(false, extractBackendErrorMessage(e.getMessage()), null, null);
         }
     }
 
-    /**
-     * Register a new user. Throws RuntimeException on failure.
-     *
-     * @param fullName user's full name
-     * @param email    user's email
-     * @param password user's password
-     */
-    public void register(String fullName, String email, String password) {
+    // ----------------- REGISTER -----------------
+    public AuthResult register(String fullName, String email, String password) {
         try {
-            String json = String.format("{\"fullName\":\"%s\",\"email\":\"%s\",\"password\":\"%s\"}",
+            String json = String.format("{\"name\":\"%s\",\"email\":\"%s\",\"password\":\"%s\"}",
                     escape(fullName), escape(email), escape(password));
-            HttpResponse<String> resp = POST("/auth/register", json, false);
+            HttpResponse<String> resp = POST("/users/register", json, false);
             int status = resp.statusCode();
             String body = resp.body();
-            if (status == 201) {
-                return;
+
+            if (status / 100 == 2) {
+                // Auto-login immediately
+                return login(email, password);
             } else {
-                throw new RuntimeException("Register failed: " + body);
+                String message = extractBackendErrorMessage(body);
+                return new AuthResult(false, message, null, null);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new AuthResult(false, extractBackendErrorMessage(e.getMessage()), null, null);
         }
     }
 
-    /**
-     * Fetch a user by id using authenticated request.
-     *
-     * @param id user id
-     * @return UserResponse on success
-     */
+    // ----------------- GET USER -----------------
     public UserResponse getUser(Integer id) {
         try {
             HttpResponse<String> resp = GET("/users/" + id, true);
@@ -93,13 +71,7 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
-    /**
-     * Update a user by id. Requires authentication.
-     *
-     * @param id  user id
-     * @param dto update payload
-     * @return updated UserResponse
-     */
+    // ----------------- UPDATE USER -----------------
     public UserResponse updateUser(Integer id, UserUpdateRequest dto) {
         try {
             String json = mapper.writeValueAsString(dto);
@@ -115,9 +87,78 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
-    private static String escape(String s) {
-        if (s == null)
-            return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    // ----------------- CHANGE PASSWORD -----------------
+    public void changePassword(String currentPassword, String newPassword) {
+        try {
+            Integer userId = UserSession.getInstance().getUserId();
+            if (userId == null)
+                throw new RuntimeException("User not logged in");
+
+            String path = String.format("/users/%d/password?old=%s&new=%s",
+                    userId,
+                    java.net.URLEncoder.encode(currentPassword, "UTF-8"),
+                    java.net.URLEncoder.encode(newPassword, "UTF-8"));
+            HttpResponse<String> resp = POST(path, "", true);
+            if (resp.statusCode() / 100 != 2) {
+                throw new RuntimeException("Change password failed: " + resp.body());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    // ----------------- DELETE USER -----------------
+    public void deleteUser(Integer id) {
+        try {
+            HttpResponse<String> resp = DELETE("/users/" + id, true);
+            if (resp.statusCode() / 100 != 2) {
+                throw new RuntimeException("Delete user failed: " + resp.body());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ----------------- HELPERS -----------------
+    private static String escape(String s) {
+        return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private static String extractBackendErrorMessage(String fullMessage) {
+        if (fullMessage == null || fullMessage.isBlank()) {
+            return "An error occurred";
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(fullMessage);
+
+            // Case 1: single message field (old style)
+            if (node.has("message")) {
+                String msg = node.get("message").asText();
+                if (msg != null && !msg.isBlank())
+                    return msg;
+            }
+
+            // Case 2: validation errors array
+            if (node.has("errors") && node.get("errors").isArray()) {
+                StringBuilder sb = new StringBuilder();
+                for (JsonNode err : node.get("errors")) {
+                    String field = err.path("field").asText();
+                    String message = err.path("defaultMessage").asText();
+                    if (!field.isBlank() && !message.isBlank()) {
+                        sb.append(field).append(": ").append(message).append("\n");
+                    }
+                }
+                if (sb.length() > 0)
+                    return sb.toString().trim();
+            }
+
+        } catch (Exception e) {
+            // Fall back to raw message
+        }
+
+        return fullMessage;
+    }
+
 }

@@ -2,20 +2,16 @@ package com.gradapptracker.ui.controllers;
 
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentCreateDTO;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentDTO;
-import com.gradapptracker.backend.programdocument.dto.ProgramDocumentUpdateDTO;
 import com.gradapptracker.ui.services.ProgramDocumentServiceFx;
 import com.gradapptracker.ui.utils.AlertUtils;
-import javafx.application.Platform;
+import com.gradapptracker.ui.utils.AsyncUtils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javafx.scene.image.ImageView;
 
 /**
  * JavaFX controller for managing ProgramDocument links in the UI.
@@ -64,7 +60,19 @@ public class ProgramDocumentController {
     private TextField txtFilterValue;
 
     @FXML
+    private ImageView logoImage;
+
+    @FXML
+    private Button btnBackPrograms;
+
+    @FXML
     public void initialize() {
+        try {
+            logoImage.setImage(new javafx.scene.image.Image(getClass().getResourceAsStream("/logo.png")));
+        } catch (Exception e) {
+            // Logo not found, skip
+        }
+
         table.setItems(items);
         // Basic column wiring if not done in FXML; use proper JavaFX properties
         colId.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getProgramDocId()).asObject());
@@ -81,61 +89,28 @@ public class ProgramDocumentController {
      */
     @FXML
     public void onAdd() {
-        try {
-            int programId = Integer.parseInt(txtProgramId.getText().trim());
-            int documentId = Integer.parseInt(txtDocumentId.getText().trim());
-            String usage = txtUsageNotes.getText();
-            ProgramDocumentCreateDTO dto = new ProgramDocumentCreateDTO();
-            dto.setProgramId(programId);
-            dto.setDocumentId(documentId);
-            dto.setUsageNotes(usage);
+        int programId = Integer.parseInt(txtProgramId.getText().trim());
+        int documentId = Integer.parseInt(txtDocumentId.getText().trim());
+        String usage = txtUsageNotes.getText();
+        ProgramDocumentCreateDTO dto = new ProgramDocumentCreateDTO();
+        dto.setProgramId(programId);
+        dto.setDocumentId(documentId);
+        dto.setUsageNotes(usage);
 
-            new Thread(() -> {
-                try {
-                    ProgramDocumentDTO created = service.createProgramDocument(dto);
-                    Platform.runLater(() -> {
-                        items.add(created);
-                        AlertUtils.info("Created", "ProgramDocument created.");
-                    });
-                } catch (Exception e) {
-                    Platform.runLater(() -> AlertUtils.error("Error", e.getMessage()));
-                }
-            }).start();
-        } catch (NumberFormatException nfe) {
-            AlertUtils.error("Invalid input", "Program ID and Document ID must be integers.");
-        }
+        AsyncUtils.run(() -> service.createProgramDocument(dto), created -> {
+            items.add(created);
+            AlertUtils.info("Created", "ProgramDocument created.");
+        }, ex -> AlertUtils.error("Error", ex == null ? "Unknown error" : ex.getMessage()));
     }
 
     /**
-     * Edit the selected program-document link using UI fields.
+     * Edit not supported - backend has no update endpoint for program-document
+     * links.
+     * To change a link, delete and recreate it.
      */
     @FXML
     public void onEdit() {
-        ProgramDocumentDTO sel = table.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            AlertUtils.warn("No selection", "Please select a row to edit.");
-            return;
-        }
-        try {
-            String usage = txtUsageNotes.getText();
-            ProgramDocumentUpdateDTO dto = new ProgramDocumentUpdateDTO();
-            dto.setUsageNotes(usage);
-
-            new Thread(() -> {
-                try {
-                    ProgramDocumentDTO updated = service.updateProgramDocument(sel.getProgramDocId(), dto);
-                    Platform.runLater(() -> {
-                        int idx = items.indexOf(sel);
-                        items.set(idx, updated);
-                        AlertUtils.info("Updated", "ProgramDocument updated.");
-                    });
-                } catch (Exception e) {
-                    Platform.runLater(() -> AlertUtils.error("Error", e.getMessage()));
-                }
-            }).start();
-        } catch (Exception e) {
-            AlertUtils.error("Error", e.getMessage());
-        }
+        AlertUtils.warn("Not Supported", "Editing links is not supported. Delete and recreate the link instead.");
     }
 
     /**
@@ -151,17 +126,13 @@ public class ProgramDocumentController {
         boolean ok = AlertUtils.confirm("Confirm delete", "Delete selected link? This cannot be undone.");
         if (!ok)
             return;
-        new Thread(() -> {
-            try {
-                service.deleteProgramDocument(sel.getProgramDocId());
-                Platform.runLater(() -> {
-                    items.remove(sel);
-                    AlertUtils.info("Deleted", "ProgramDocument deleted.");
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> AlertUtils.error("Error", e.getMessage()));
-            }
-        }).start();
+        AsyncUtils.run(() -> {
+            service.deleteProgramDocument(sel.getProgramDocId());
+            return null;
+        }, unused -> {
+            items.remove(sel);
+            AlertUtils.info("Deleted", "ProgramDocument deleted.");
+        }, ex -> AlertUtils.error("Error", ex == null ? "Unknown error" : ex.getMessage()));
     }
 
     /**
@@ -169,44 +140,18 @@ public class ProgramDocumentController {
      */
     @FXML
     public void onRefresh() {
-        try {
-            int programId = Integer.parseInt(txtProgramId.getText().trim());
-            new Thread(() -> {
-                try {
-                    List<ProgramDocumentDTO> list = service.getAllProgramDocuments(programId);
-                    Platform.runLater(() -> items.setAll(list));
-                } catch (Exception e) {
-                    Platform.runLater(() -> AlertUtils.error("Error", e.getMessage()));
-                }
-            }).start();
-        } catch (NumberFormatException nfe) {
-            AlertUtils.error("Invalid input", "Program ID must be an integer.");
-        } catch (Exception e) {
-            AlertUtils.error("Error", e.getMessage());
-        }
+        int programId = Integer.parseInt(txtProgramId.getText().trim());
+        AsyncUtils.run(() -> service.getAllProgramDocuments(programId), list -> items.setAll(list),
+                ex -> AlertUtils.error("Error", ex == null ? "Unknown error" : ex.getMessage()));
     }
 
     /**
-     * Apply a simple filter using the selected key and filter value.
+     * Filter not supported - backend has no filter endpoint for program-document
+     * links.
      */
     @FXML
     public void onFilter() {
-        String key = cbFilterBy.getValue();
-        String val = txtFilterValue.getText();
-        if (key == null || key.isBlank()) {
-            AlertUtils.warn("No filter", "Select a filter key.");
-            return;
-        }
-        Map<String, Object> filters = new HashMap<>();
-        filters.put(key, val);
-        new Thread(() -> {
-            try {
-                List<ProgramDocumentDTO> list = service.filterProgramDocuments(filters);
-                Platform.runLater(() -> items.setAll(list));
-            } catch (Exception e) {
-                Platform.runLater(() -> AlertUtils.error("Error", e.getMessage()));
-            }
-        }).start();
+        AlertUtils.warn("Not Supported", "Filtering is not supported. Use Refresh to load links for a program.");
     }
 
     // Optional helper to pre-fill fields when a table row is selected
@@ -218,5 +163,10 @@ public class ProgramDocumentController {
         txtProgramId.setText(String.valueOf(sel.getProgramId()));
         txtDocumentId.setText(String.valueOf(sel.getDocumentId()));
         txtUsageNotes.setText(sel.getUsageNotes());
+    }
+
+    @FXML
+    private void onBackPrograms() {
+        MainLayoutController.getInstance().setContent("/com/gradapptracker/ui/views/ProgramView.fxml");
     }
 }

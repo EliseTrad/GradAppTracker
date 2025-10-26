@@ -103,8 +103,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("message", "Validation failed");
 
+        // Aggregate all field errors into a single readable string
+        String aggregatedMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("Validation failed");
+
+        body.put("message", aggregatedMessage);
+
+        // Optional: keep the errors array for frontend debugging
         var errors = ex.getBindingResult().getFieldErrors().stream().map(fe -> {
             Map<String, Object> m = new HashMap<>();
             m.put("field", fe.getField());
@@ -190,4 +198,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 }
-

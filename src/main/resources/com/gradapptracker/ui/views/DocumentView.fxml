@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  DocumentView.fxml
+  Full CRUD management for documents.
+  Handles document upload, update, delete operations.
+-->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.DocumentController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" style="-fx-background-color: #f8f9fa; -fx-background: #f8f9fa;">
+  <content>
+    <VBox spacing="20" style="-fx-background-color: #f8f9fa;">
+
+      <children>
+        <!-- Page Title -->
+        <Label text="Documents Management" styleClass="section-title" style="-fx-font-size: 24px;" />
+
+        <!-- Documents Table Section -->
+        <VBox styleClass="content-card" spacing="15" VBox.vgrow="ALWAYS">
+          <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label text="Your Documents" styleClass="section-title" />
+            <Region HBox.hgrow="ALWAYS" />
+
+            <!-- Enhanced Filtering Section -->
+            <VBox spacing="8">
+              <Label text="Filter Documents:" style="-fx-font-weight: bold;" />
+              <HBox spacing="10" alignment="CENTER_LEFT">
+                <VBox spacing="4">
+                  <Label text="Document Type:" style="-fx-font-size: 11px;" />
+                  <TextField fx:id="txtFilterDocType" promptText="Type..." prefWidth="120" />
+                </VBox>
+                <VBox spacing="4">
+                  <Label text="File Name:" style="-fx-font-size: 11px;" />
+                  <TextField fx:id="txtFilterFileName" promptText="Name..." prefWidth="120" />
+                </VBox>
+                <VBox spacing="4">
+                  <Label text="Notes:" style="-fx-font-size: 11px;" />
+                  <TextField fx:id="txtFilterNotes" promptText="Notes..." prefWidth="120" />
+                </VBox>
+                <VBox spacing="4" alignment="BOTTOM_LEFT">
+                  <Label text=" " style="-fx-font-size: 11px;" />
+                  <HBox spacing="6">
+                    <Button text="Filter" fx:id="btnFilter" onAction="#onFilter" prefWidth="80" />
+                    <Button text="Clear" fx:id="btnClearFilter" onAction="#onClearFilter" styleClass="button-outline" prefWidth="60" />
+                  </HBox>
+                </VBox>
+              </HBox>
+            </VBox>
+            <Button text="Refresh" fx:id="btnRefresh" onAction="#onRefresh" styleClass="button-secondary" prefWidth="80" />
+          </HBox>
+
+          <!-- Documents Table -->
+          <TableView fx:id="tblDocuments" VBox.vgrow="ALWAYS" onMouseClicked="#onRowSelect">
+            <columns>
+              <TableColumn text="Preview" fx:id="colPreview" prefWidth="80" sortable="false" style="-fx-alignment: CENTER;" />
+              <TableColumn text="Document Type" fx:id="colDocType" prefWidth="150" style="-fx-alignment: CENTER;" />
+              <TableColumn text="File Name" fx:id="colFileName" prefWidth="250" style="-fx-alignment: CENTER;" />
+              <TableColumn text="Notes" fx:id="colNotes" prefWidth="300" style="-fx-alignment: CENTER;" />
+              <TableColumn text="File Path" fx:id="colFilePath" prefWidth="250" visible="false" style="-fx-alignment: CENTER;" />
+            </columns>
+            <placeholder>
+              <Label text="No documents uploaded yet. Upload your first document below!" style="-fx-text-fill: #9e9e9e; -fx-font-size: 14px;" />
+            </placeholder>
+          </TableView>
+
+          <Label fx:id="lblDocumentCount" text="Total: 0 documents" style="-fx-text-fill: #757575;" />
+        </VBox>
+
+        <!-- Document Upload/Edit Form -->
+        <VBox styleClass="content-card" spacing="15">
+          <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label text="Document Details" styleClass="section-title" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblFormMode" text="Upload New Document" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2;" />
+          </HBox>
+
+          <!-- Info Box -->
+          <HBox styleClass="alert-info" spacing="10" alignment="CENTER_LEFT">
+            <Label text="ℹ️" style="-fx-font-size: 18px;" />
+            <VBox spacing="4">
+              <Label text="Document Type is free text - enter any type you need." style="-fx-font-weight: bold; -fx-text-fill: #1976d2;" />
+              <Label text="Examples: Transcript, CV/Resume, Statement of Purpose, Recommendation Letter, Certificate, Test Score, ID Document, Other" wrapText="true" style="-fx-text-fill: #424242; -fx-font-size: 12px;" />
+            </VBox>
+          </HBox>
+
+          <!-- Form Fields -->
+          <GridPane hgap="15" vgap="15">
+            <columnConstraints>
+              <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120" />
+              <ColumnConstraints hgrow="ALWAYS" />
+            </columnConstraints>
+
+            <!-- Row 0: Document Type (free text) -->
+            <Label text="Document Type:" styleClass="field-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="txtDocType" promptText="Enter document type..." GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" />
+
+            <!-- Row 1: File Selection -->
+            <Label text="Select File:" styleClass="field-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <HBox spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="1">
+              <TextField fx:id="txtFilePath" promptText="No file selected" editable="false" HBox.hgrow="ALWAYS" />
+              <Button text="📁 Browse" fx:id="btnBrowse" onAction="#onBrowse" prefWidth="100" />
+            </HBox>
+
+            <!-- Row 2: File Name (for update only) -->
+            <Label text="File Name:" styleClass="field-label" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <TextField fx:id="txtFileName" promptText="Optional: Custom file name" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+            <!-- Row 3: Notes -->
+            <Label text="Notes:" styleClass="field-label" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+            <TextArea fx:id="txtNotes" promptText="Add notes about this document (e.g., 'Official transcript from XYZ University')" prefRowCount="3" wrapText="true" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+          </GridPane>
+
+          <!-- Action Buttons -->
+          <HBox spacing="12" alignment="CENTER_LEFT">
+            <Button text="Upload Document" fx:id="btnUpload" onAction="#onUpload" styleClass="button-success" prefWidth="170" />
+            <Button text="Update Info" fx:id="btnUpdate" onAction="#onUpdate" styleClass="button-primary" prefWidth="120" />
+            <Button text="Delete" fx:id="btnDelete" onAction="#onDelete" styleClass="button-danger" prefWidth="100" />
+            <Button text="Clear Form" fx:id="btnClear" onAction="#onClear" styleClass="button-outline" prefWidth="120" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Open File Location" fx:id="btnOpenFile" onAction="#onOpenFile" styleClass="button-secondary" prefWidth="180" />
+          </HBox>
+        </VBox>
+
+        <!-- Programs Using This Document -->
+        <VBox fx:id="programsUsingDocSection" styleClass="content-card" spacing="12" visible="false" managed="false">
+          <Label text="Programs Using This Document" styleClass="section-title" />
+
+          <ListView fx:id="lstProgramsUsingDoc" prefHeight="120">
+            <placeholder>
+              <Label text="This document is not linked to any programs yet." style="-fx-text-fill: #9e9e9e;" />
+            </placeholder>
+          </ListView>
+
+          <Label text="Tip: Go to Programs page to link this document to applications." style="-fx-text-fill: #757575; -fx-font-size: 12px; -fx-font-style: italic;" />
+        </VBox>
+
+      </children>
+
+      <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+      </padding>
+    </VBox>
+  </content>
+</ScrollPane>

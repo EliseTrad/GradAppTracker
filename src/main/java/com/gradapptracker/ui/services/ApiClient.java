@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.time.Duration;
 
 /**
@@ -106,6 +107,118 @@ public class ApiClient {
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
+        }
+    }
+
+    protected HttpResponse<String> POST_MULTIPART(String path, java.io.File file, String docType, String notes,
+            boolean auth) {
+        try {
+            String boundary = "----FormBoundary" + System.currentTimeMillis();
+
+            // Use proper multipart body with binary file handling
+            MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder(boundary);
+            bodyBuilder.addFilePart("file", file);
+            bodyBuilder.addTextPart("docType", docType);
+            if (notes != null && !notes.trim().isEmpty()) {
+                bodyBuilder.addTextPart("notes", notes);
+            }
+
+            HttpRequest.Builder b = request(path)
+                    .POST(bodyBuilder.build())
+                    .header("Content-Type", "multipart/form-data; boundary=" + boundary);
+            if (auth) {
+                String token = UserSession.getInstance().getJwt();
+                if (token != null) {
+                    b.header("Authorization", "Bearer " + token);
+                }
+            }
+            HttpRequest req = b.build();
+            return client.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected HttpResponse<String> PUT_MULTIPART(String path, java.io.File file, boolean auth) {
+        try {
+            String boundary = "----FormBoundary" + System.currentTimeMillis();
+
+            MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder(boundary);
+            bodyBuilder.addFilePart("file", file);
+
+            HttpRequest.Builder b = request(path)
+                    .PUT(bodyBuilder.build())
+                    .header("Content-Type", "multipart/form-data; boundary=" + boundary);
+            if (auth) {
+                String token = UserSession.getInstance().getJwt();
+                if (token != null) {
+                    b.header("Authorization", "Bearer " + token);
+                }
+            }
+            HttpRequest req = b.build();
+            return client.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected HttpResponse<byte[]> GET_BYTES(String path, boolean auth) {
+        try {
+            HttpRequest.Builder b = request(path).GET();
+            if (auth) {
+                String token = UserSession.getInstance().getJwt();
+                if (token != null) {
+                    b.header("Authorization", "Bearer " + token);
+                }
+            }
+            HttpRequest req = b.build();
+            return client.send(req, HttpResponse.BodyHandlers.ofByteArray());
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Helper class to build proper multipart request bodies that preserve binary
+     * data
+     */
+    private static class MultipartBodyBuilder {
+        private final String boundary;
+        private final java.io.ByteArrayOutputStream outputStream;
+        private final String CRLF = "\r\n";
+
+        public MultipartBodyBuilder(String boundary) {
+            this.boundary = boundary;
+            this.outputStream = new java.io.ByteArrayOutputStream();
+        }
+
+        public void addTextPart(String name, String value) throws IOException {
+            outputStream.write(("--" + boundary + CRLF).getBytes());
+            outputStream.write(("Content-Disposition: form-data; name=\"" + name + "\"" + CRLF).getBytes());
+            outputStream.write((CRLF).getBytes());
+            outputStream.write(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            outputStream.write((CRLF).getBytes());
+        }
+
+        public void addFilePart(String name, java.io.File file) throws IOException {
+            outputStream.write(("--" + boundary + CRLF).getBytes());
+            outputStream.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + file.getName()
+                    + "\"" + CRLF).getBytes());
+            outputStream.write(("Content-Type: application/octet-stream" + CRLF).getBytes());
+            outputStream.write((CRLF).getBytes());
+
+            // Write binary file data directly without string conversion
+            Files.copy(file.toPath(), outputStream);
+
+            outputStream.write((CRLF).getBytes());
+        }
+
+        public HttpRequest.BodyPublisher build() throws IOException {
+            outputStream.write(("--" + boundary + "--" + CRLF).getBytes());
+            return HttpRequest.BodyPublishers.ofByteArray(outputStream.toByteArray());
         }
     }
 }

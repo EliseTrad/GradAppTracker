@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<!--
+  WelcomeView.fxml - Landing page with login and registration
+  Scrollable and fits screen
+-->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.WelcomeController" fitToWidth="true" style="-fx-background-color: #fce4ec; -fx-background: #fce4ec;">
+
+  <content>
+    <VBox alignment="CENTER" spacing="8" style="-fx-background-color: #fce4ec; -fx-padding: 12;">
+
+      <!-- Welcome Title (logo removed for space) -->
+      <VBox alignment="CENTER" spacing="2">
+        <Label text="GradAppTracker" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #880e4f;" />
+        <Label text="Simplify Your Graduate Applications" style="-fx-font-size: 11px; -fx-text-fill: #7b1fa2; -fx-font-weight: 600;" />
+      </VBox>
+
+      <!-- Login/Register Form Container -->
+      <VBox style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e1bee7; -fx-border-width: 2; -fx-border-radius: 10;" spacing="8" maxWidth="550" prefWidth="550">
+
+        <!-- TabPane for Login/Register -->
+        <TabPane fx:id="authTabPane" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: white;" prefHeight="320" minHeight="280">
+
+          <!-- Login Tab -->
+          <Tab text="Login" fx:id="loginTab">
+            <content>
+              <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: white;">
+                <Label text="Welcome Back!" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #7b1fa2;" />
+
+                <!-- Login Form -->
+                <VBox spacing="10">
+                  <VBox spacing="4">
+                    <Label text="Email:" style="-fx-font-weight: 600; -fx-text-fill: #7b1fa2; -fx-font-size: 12px;" />
+                    <TextField fx:id="txtLoginEmail" promptText="you@example.com" style="-fx-min-height: 32px; -fx-background-color: white; -fx-border-color: #bdbdbd; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6; -fx-font-size: 12px;" />
+                  </VBox>
+
+                  <VBox spacing="4">
+                    <Label text="Password:" style="-fx-font-weight: 600; -fx-text-fill: #7b1fa2; -fx-font-size: 12px;" />
+                    <PasswordField fx:id="txtLoginPassword" promptText="Enter password" style="-fx-min-height: 32px; -fx-background-color: white; -fx-border-color: #bdbdbd; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6; -fx-font-size: 12px;" />
+                  </VBox>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER" style="-fx-padding: 5 0 0 0;">
+                  <Button text="Login" fx:id="btnLogin" onAction="#onLogin" prefWidth="120" style="-fx-background-color: #e91e63; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;" />
+                  <Button text="New User?" onAction="#onSwitchToRegister" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #e91e63; -fx-border-width: 2; -fx-text-fill: #e91e63; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 8 15; -fx-background-radius: 6; -fx-border-radius: 6; -fx-cursor: hand;" />
+                </HBox>
+              </VBox>
+            </content>
+          </Tab>
+
+          <!-- Register Tab -->
+          <Tab text="New User?" fx:id="registerTab">
+            <content>
+              <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: white;">
+                <Label text="Create Account" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #7b1fa2;" />
+
+                <!-- Register Form -->
+                <VBox spacing="10">
+                  <VBox spacing="4">
+                    <Label text="Full Name:" style="-fx-font-weight: 600; -fx-text-fill: #7b1fa2; -fx-font-size: 12px;" />
+                    <TextField fx:id="txtRegisterName" promptText="John Doe" style="-fx-min-height: 32px; -fx-background-color: white; -fx-border-color: #bdbdbd; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6; -fx-font-size: 12px;" />
+                  </VBox>
+
+                  <VBox spacing="4">
+                    <Label text="Email:" style="-fx-font-weight: 600; -fx-text-fill: #7b1fa2; -fx-font-size: 12px;" />
+                    <TextField fx:id="txtRegisterEmail" promptText="you@example.com" style="-fx-min-height: 32px; -fx-background-color: white; -fx-border-color: #bdbdbd; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6; -fx-font-size: 12px;" />
+                  </VBox>
+
+                  <VBox spacing="4">
+                    <Label text="Password:" style="-fx-font-weight: 600; -fx-text-fill: #7b1fa2; -fx-font-size: 12px;" />
+                    <PasswordField fx:id="txtRegisterPassword" promptText="Create strong password" style="-fx-min-height: 32px; -fx-background-color: white; -fx-border-color: #bdbdbd; -fx-border-width: 1.5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6; -fx-font-size: 12px;" />
+                  </VBox>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER" style="-fx-padding: 5 0 0 0;">
+                  <Button text="Create Account" fx:id="btnRegister" onAction="#onRegister" prefWidth="120" style="-fx-background-color: #e91e63; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 8 15; -fx-background-radius: 6; -fx-cursor: hand;" />
+                  <Button text="Have Account? Login" onAction="#onSwitchToLogin" prefWidth="150" style="-fx-background-color: white; -fx-border-color: #e91e63; -fx-border-width: 2; -fx-text-fill: #e91e63; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 8 15; -fx-background-radius: 6; -fx-border-radius: 6; -fx-cursor: hand;" />
+                </HBox>
+              </VBox>
+            </content>
+          </Tab>
+
+        </TabPane>
+      </VBox>
+
+      <!-- Feature Highlights -->
+      <HBox spacing="8" alignment="CENTER" style="-fx-padding: 3 0 8 0;">
+        <VBox style="-fx-background-color: white; -fx-padding: 8; -fx-background-radius: 6; -fx-border-color: #e1bee7; -fx-border-width: 1; -fx-border-radius: 6;" spacing="2" prefWidth="140" alignment="CENTER">
+          <Label text="📚 Track" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2; -fx-font-size: 10px;" />
+        </VBox>
+
+        <VBox style="-fx-background-color: white; -fx-padding: 8; -fx-background-radius: 6; -fx-border-color: #e1bee7; -fx-border-width: 1; -fx-border-radius: 6;" spacing="2" prefWidth="140" alignment="CENTER">
+          <Label text="Manage" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2; -fx-font-size: 10px;" />
+        </VBox>
+
+        <VBox style="-fx-background-color: white; -fx-padding: 8; -fx-background-radius: 6; -fx-border-color: #e1bee7; -fx-border-width: 1; -fx-border-radius: 6;" spacing="2" prefWidth="140" alignment="CENTER">
+          <Label text="Track Dates" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2; -fx-font-size: 10px;" />
+        </VBox>
+      </HBox>
+
+    </VBox>
+  </content>
+</ScrollPane>

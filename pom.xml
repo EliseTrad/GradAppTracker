@@ -146,6 +146,29 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+
+      <!-- JavaFX Maven plugin: allows `mvn javafx:run` to start the AppLauncher -->
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+          <!-- Main class for the JavaFX application -->
+          <mainClass>com.gradapptracker.ui.AppLauncher</mainClass>
+          <!-- Use the same platform classifier used for javafx dependencies -->
+          <launcher>javafx</launcher>
+        </configuration>
+      </plugin>
+
+      <!-- Exec plugin configured with AppLauncher so frontend can be run without CLI -D flags -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>com.gradapptracker.ui.AppLauncher</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

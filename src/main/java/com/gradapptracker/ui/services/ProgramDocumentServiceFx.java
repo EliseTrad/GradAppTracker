@@ -4,26 +4,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentCreateDTO;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentDTO;
-import com.gradapptracker.backend.programdocument.dto.ProgramDocumentUpdateDTO;
 
 import java.net.http.HttpResponse;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * JavaFX frontend service for ProgramDocument operations.
  * <p>
  * Uses {@link ApiClient} for HTTP and Jackson's {@link ObjectMapper} for JSON.
- * All requests are made against the backend path "/programdocuments".
- * Methods throw RuntimeException for non-success responses (except filter which
- * returns an empty list on failure). All exceptions are wrapped in
- * RuntimeException.
+ * Backend endpoints are under /api/programs/{programId}/documents and
+ * /api/program-docs/{id}.
+ * All exceptions are wrapped in RuntimeException.
  */
 public class ProgramDocumentServiceFx extends ApiClient {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final String basePath = "/programdocuments";
 
     public ProgramDocumentServiceFx() {
         super();
@@ -35,7 +30,7 @@ public class ProgramDocumentServiceFx extends ApiClient {
     public ProgramDocumentDTO createProgramDocument(ProgramDocumentCreateDTO dto) {
         try {
             String json = mapper.writeValueAsString(dto);
-            HttpResponse<String> resp = POST(basePath, json, true);
+            HttpResponse<String> resp = POST("/programs/" + dto.getProgramId() + "/documents", json, true);
             if (resp.statusCode() / 100 == 2) {
                 return mapper.readValue(resp.body(), ProgramDocumentDTO.class);
             }
@@ -50,7 +45,7 @@ public class ProgramDocumentServiceFx extends ApiClient {
      */
     public List<ProgramDocumentDTO> getAllProgramDocuments(int programId) {
         try {
-            HttpResponse<String> resp = GET(basePath + "?programId=" + programId, true);
+            HttpResponse<String> resp = GET("/programs/" + programId + "/documents", true);
             if (resp.statusCode() / 100 == 2) {
                 return mapper.readValue(resp.body(), new TypeReference<List<ProgramDocumentDTO>>() {
                 });
@@ -62,42 +57,12 @@ public class ProgramDocumentServiceFx extends ApiClient {
     }
 
     /**
-     * Get a single ProgramDocument by id.
-     */
-    public ProgramDocumentDTO getProgramDocumentById(int programDocumentId) {
-        try {
-            HttpResponse<String> resp = GET(basePath + "/" + programDocumentId, true);
-            if (resp.statusCode() / 100 == 2) {
-                return mapper.readValue(resp.body(), ProgramDocumentDTO.class);
-            }
-            throw new RuntimeException("Get failed: " + resp.body());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Update an existing ProgramDocument.
-     */
-    public ProgramDocumentDTO updateProgramDocument(int programDocumentId, ProgramDocumentUpdateDTO dto) {
-        try {
-            String json = mapper.writeValueAsString(dto);
-            HttpResponse<String> resp = PUT(basePath + "/" + programDocumentId, json, true);
-            if (resp.statusCode() / 100 == 2) {
-                return mapper.readValue(resp.body(), ProgramDocumentDTO.class);
-            }
-            throw new RuntimeException("Update failed: " + resp.body());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Delete a ProgramDocument by id.
+     * Backend endpoint: DELETE /api/program-docs/{programDocId}
      */
     public void deleteProgramDocument(int programDocumentId) {
         try {
-            HttpResponse<String> resp = DELETE(basePath + "/" + programDocumentId, true);
+            HttpResponse<String> resp = DELETE("/program-docs/" + programDocumentId, true);
             if (resp.statusCode() / 100 == 2) {
                 return;
             }
@@ -107,21 +72,9 @@ public class ProgramDocumentServiceFx extends ApiClient {
         }
     }
 
-    /**
-     * Filter program documents. The backend supports POST /programdocuments/filter.
-     * On failure this method returns an empty list rather than throwing.
-     */
-    public List<ProgramDocumentDTO> filterProgramDocuments(Map<String, Object> filters) {
-        try {
-            String json = mapper.writeValueAsString(filters);
-            HttpResponse<String> resp = POST(basePath + "/filter", json, true);
-            if (resp.statusCode() / 100 == 2) {
-                return mapper.readValue(resp.body(), new TypeReference<List<ProgramDocumentDTO>>() {
-                });
-            }
-            return Collections.emptyList();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    // NOTE: Backend does NOT support the following operations:
+    // - getProgramDocumentById (no such endpoint)
+    // - updateProgramDocument (no such endpoint)
+    // - filterProgramDocuments (no such endpoint)
+    // If these are needed, they must be added to the backend first.
 }

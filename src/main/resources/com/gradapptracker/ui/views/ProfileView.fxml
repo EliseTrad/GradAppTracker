@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  ProfileView.fxml
+  User profile management - view/update user info, change password, logout, delete account.
+-->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.ProfileController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" style="-fx-background-color: #f8f9fa; -fx-background: #f8f9fa;">
+  <content>
+    <VBox spacing="20" style="-fx-background-color: #f8f9fa;">
+
+      <children>
+        <!-- Page Title -->
+        <Label text="Profile Settings" styleClass="section-title" style="-fx-font-size: 24px;" />
+
+        <!-- User Information Section -->
+        <VBox styleClass="content-card" spacing="20">
+          <Label text="Account Information" styleClass="section-title" />
+
+          <HBox styleClass="alert-info" spacing="10" alignment="CENTER_LEFT">
+            <Label text="👤" style="-fx-font-size: 20px;" />
+            <Label text="Manage your account details and preferences." style="-fx-text-fill: #424242;" />
+          </HBox>
+
+          <!-- User Info Form -->
+          <GridPane hgap="15" vgap="15">
+            <columnConstraints>
+              <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120" />
+              <ColumnConstraints hgrow="ALWAYS" maxWidth="400" />
+            </columnConstraints>
+
+            <Label text="Full Name:" styleClass="field-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="txtName" promptText="Your full name" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+            <Label text="Email:" styleClass="field-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <TextField fx:id="txtEmail" promptText="your@email.com" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+          </GridPane>
+
+          <HBox spacing="12">
+            <Button text="Update Information" fx:id="btnUpdate" onAction="#onUpdate" styleClass="button-primary" prefWidth="200" minWidth="200" />
+          </HBox>
+        </VBox>
+
+        <!-- Change Password Section -->
+        <VBox styleClass="content-card" spacing="20">
+          <Label text="Change Password" styleClass="section-title" />
+
+          <HBox styleClass="alert-warning" spacing="10" alignment="CENTER_LEFT">
+            <Label text="🔒" style="-fx-font-size: 20px;" />
+            <Label text="Choose a strong password with at least 8 characters." style="-fx-text-fill: #424242;" />
+          </HBox>
+
+          <!-- Password Change Form -->
+          <GridPane hgap="15" vgap="15">
+            <columnConstraints>
+              <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120" />
+              <ColumnConstraints hgrow="ALWAYS" maxWidth="400" />
+            </columnConstraints>
+
+            <Label text="Current Password:" styleClass="field-label" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <PasswordField fx:id="txtCurrentPassword" promptText="Enter current password" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+            <Label text="New Password:" styleClass="field-label" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <PasswordField fx:id="txtNewPassword" promptText="Enter new password" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+          </GridPane>
+
+          <HBox spacing="12">
+            <Button text="🔑 Change Password" fx:id="btnChangePassword" onAction="#onChangePassword" styleClass="button-secondary" prefWidth="200" minWidth="200" />
+          </HBox>
+        </VBox>
+
+        <!-- Account Actions Section -->
+        <VBox styleClass="content-card" spacing="20">
+          <Label text="Account Actions" styleClass="section-title" />
+
+          <!-- Sign Out -->
+          <VBox spacing="10">
+            <Label text="Sign Out" style="-fx-font-weight: bold; -fx-text-fill: #424242;" />
+            <Label text="Sign out of your account. You can log back in anytime." style="-fx-text-fill: #757575; -fx-font-size: 13px;" />
+            <Button text="🚪 Sign Out" fx:id="btnSignOut" onAction="#onSignOut" styleClass="button-warning" prefWidth="160" minWidth="160" />
+          </VBox>
+
+          <Separator />
+
+          <!-- Delete Account -->
+          <VBox spacing="10">
+            <Label text="Delete Account" style="-fx-font-weight: bold; -fx-text-fill: #f44336;" />
+            <Label text="⚠️ Warning: This action is permanent and cannot be undone. All your data will be deleted." wrapText="true" maxWidth="600" style="-fx-text-fill: #757575; -fx-font-size: 13px;" />
+            <Button text="Delete My Account" fx:id="btnDeleteAccount" onAction="#onDeleteAccount" styleClass="button-danger" prefWidth="200" minWidth="200" />
+          </VBox>
+        </VBox>
+
+      </children>
+
+      <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+      </padding>
+    </VBox>
+  </content>
+</ScrollPane>

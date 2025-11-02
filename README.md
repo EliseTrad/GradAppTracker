@@ -204,11 +204,5 @@ mvn javafx:run
 - Frontend controllers: `src/main/java/com/gradapptracker/ui/controllers`
 - Backend controllers and DTOs: `src/main/java/com/gradapptracker/backend`
 
-If you'd like, I can also:
-
-- create a dedicated `README.md` from this content (so GitHub displays it),
-- or add a quick troubleshooting checklist for common runtime errors.
-
 ---
-
 Thank you — happy tracking!

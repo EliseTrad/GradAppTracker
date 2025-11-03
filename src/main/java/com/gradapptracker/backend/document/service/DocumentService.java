@@ -2,11 +2,13 @@ package com.gradapptracker.backend.document.service;
 
 import com.gradapptracker.backend.programdocument.repository.ProgramDocumentRepository;
 import com.gradapptracker.backend.document.dto.DocumentResponseDTO;
+import com.gradapptracker.backend.document.dto.DocumentUpdateDTO;
 import com.gradapptracker.backend.document.entity.Document;
 import com.gradapptracker.backend.document.repository.DocumentRepository;
 import com.gradapptracker.backend.user.entity.User;
 import com.gradapptracker.backend.user.repository.UserRepository;
 import com.gradapptracker.backend.exception.AppException;
+import com.gradapptracker.backend.exception.DocumentReferencedException;
 import com.gradapptracker.backend.exception.ForbiddenException;
 import com.gradapptracker.backend.exception.NotFoundException;
 import com.gradapptracker.backend.exception.ValidationException;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -68,15 +71,15 @@ public class DocumentService {
      * @return updated DocumentResponseDTO
      */
     @Transactional
-    public com.gradapptracker.backend.document.dto.DocumentResponseDTO updateDocument(Integer authenticatedUserId,
+    public DocumentResponseDTO updateDocument(Integer authenticatedUserId,
             Integer documentId,
-            com.gradapptracker.backend.document.dto.DocumentUpdateDTO dto) {
-        Optional<Document> dOpt = documentRepository.findById(documentId);
-        if (dOpt.isEmpty()) {
+            DocumentUpdateDTO dto) {
+        Optional<Document> docTemp = documentRepository.findById(documentId);
+        if (docTemp.isEmpty()) {
             throw new NotFoundException("Document not found with id: " + documentId);
         }
 
-        Document doc = dOpt.get();
+        Document doc = docTemp.get();
 
         Integer ownerId = doc.getUser() != null ? doc.getUser().getUserId() : null;
         if (ownerId == null) {
@@ -187,7 +190,8 @@ public class DocumentService {
         // Auth check: allow if same user or admin (admin check omitted here â€” project
         // typically encodes roles in security layer)
         if (!authenticatedUserId.equals(userId)) {
-            // no admin role inspection here â€” if needed, caller should allow or pass a flag
+            // no admin role inspection here â€” if needed, caller should allow or pass a
+            // flag
             throw new ForbiddenException("not authorized to upload for this user");
         }
 
@@ -310,7 +314,7 @@ public class DocumentService {
      * @return list of DocumentResponseDTO
      */
     @Transactional(readOnly = true)
-    public List<com.gradapptracker.backend.document.dto.DocumentResponseDTO> getAllByUser(Integer authenticatedUserId,
+    public List<DocumentResponseDTO> getAllByUser(Integer authenticatedUserId,
             Integer userId) {
         if (!authenticatedUserId.equals(userId)) {
             throw new ForbiddenException("not authorized to view documents for this user");
@@ -323,16 +327,21 @@ public class DocumentService {
 
         List<Document> docs = documentRepository.findByUserUserId(userId);
 
-        return docs.stream().map(d -> {
-            com.gradapptracker.backend.document.dto.DocumentResponseDTO dto = new com.gradapptracker.backend.document.dto.DocumentResponseDTO();
+        List<DocumentResponseDTO> dtoList = new ArrayList<>();
+
+        for (Document d : docs) {
+            DocumentResponseDTO dto = new DocumentResponseDTO();
             dto.setDocumentId(d.getDocumentId());
             dto.setUserId(d.getUser() != null ? d.getUser().getUserId() : null);
             dto.setFileName(d.getFileName());
             dto.setFilePath(d.getFilePath());
             dto.setDocType(d.getDocType());
             dto.setNotes(d.getNotes());
-            return dto;
-        }).collect(Collectors.toList());
+
+            dtoList.add(dto);
+        }
+
+        return dtoList;
     }
 
     /**
@@ -346,7 +355,7 @@ public class DocumentService {
      * @return list of matching DocumentResponseDTO
      */
     @Transactional(readOnly = true)
-    public List<com.gradapptracker.backend.document.dto.DocumentResponseDTO> getByType(Integer authenticatedUserId,
+    public List<DocumentResponseDTO> getByType(Integer authenticatedUserId,
             Integer userId, String docType) {
         if (docType == null || docType.isBlank()) {
             throw new ValidationException("docType must not be blank");
@@ -363,16 +372,21 @@ public class DocumentService {
 
         List<Document> docs = documentRepository.findByDocTypeContainingIgnoreCaseAndUserUserId(docType, userId);
 
-        return docs.stream().map(d -> {
-            com.gradapptracker.backend.document.dto.DocumentResponseDTO dto = new com.gradapptracker.backend.document.dto.DocumentResponseDTO();
+        List<DocumentResponseDTO> dtoList = new ArrayList<>();
+
+        for (Document d : docs) {
+            DocumentResponseDTO dto = new DocumentResponseDTO();
             dto.setDocumentId(d.getDocumentId());
             dto.setUserId(d.getUser() != null ? d.getUser().getUserId() : null);
             dto.setFileName(d.getFileName());
             dto.setFilePath(d.getFilePath());
             dto.setDocType(d.getDocType());
             dto.setNotes(d.getNotes());
-            return dto;
-        }).collect(Collectors.toList());
+
+            dtoList.add(dto);
+        }
+
+        return dtoList;
     }
 
     /**
@@ -403,7 +417,7 @@ public class DocumentService {
 
         // Check references in program documents
         if (programDocumentRepository.existsByDocumentDocumentId(documentId)) {
-            throw new com.gradapptracker.backend.exception.DocumentReferencedException(
+            throw new DocumentReferencedException(
                     "Document linked to programs; unlink first");
         }
 
@@ -588,4 +602,3 @@ public class DocumentService {
     }
 
 }
-

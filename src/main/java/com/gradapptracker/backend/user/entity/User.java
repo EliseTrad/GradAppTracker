@@ -94,4 +94,3 @@ public class User {
         this.documents = documents;
     }
 }
-

@@ -59,6 +59,7 @@ public class UserController {
 		return userService.login(req.getEmail(), req.getPassword());
 	}
 
+	
 	/**
 	 * Get a user by id.
 	 */

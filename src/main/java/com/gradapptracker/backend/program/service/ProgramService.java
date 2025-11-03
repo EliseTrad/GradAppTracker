@@ -9,15 +9,10 @@ import com.gradapptracker.backend.user.entity.User;
 import com.gradapptracker.backend.user.repository.UserRepository;
 import com.gradapptracker.backend.exception.ForbiddenException;
 import com.gradapptracker.backend.exception.NotFoundException;
-import com.gradapptracker.backend.exception.ValidationException;
+import com.gradapptracker.backend.exception.UnauthorizedException;
 
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -72,21 +67,20 @@ public class ProgramService {
     /**
      * Create a new Program for the given user.
      *
+     * Basic field validation is handled by DTO annotations via @Valid in
+     * controller.
+     * This method enforces business rules like user existence.
+     *
      * @param userId id of the owner user; must exist
-     * @param dto    create payload; must contain a non-blank universityName
+     * @param dto    create payload; validated by @Valid in controller
      * @return the newly created Program as a ProgramDTO
-     * @throws ValidationException when dto is null or required fields are missing
-     * @throws NotFoundException   when the provided userId does not exist
+     * @throws NotFoundException when the provided userId does not exist
      */
     @Transactional
     public ProgramDTO createProgram(Integer userId, ProgramCreateDTO dto) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
-        if (dto == null)
-            throw new ValidationException("request body is required");
-        if (dto.getUniversityName() == null || dto.getUniversityName().isBlank())
-            throw new ValidationException("universityName is required");
 
         Optional<User> uOpt = userRepository.findById(userId);
         if (uOpt.isEmpty()) {
@@ -121,7 +115,7 @@ public class ProgramService {
     @Transactional(readOnly = true)
     public List<ProgramDTO> getAllProgramsByUser(Integer userId) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
         // verify user exists
         Optional<User> uOpt = userRepository.findById(userId);
@@ -130,7 +124,13 @@ public class ProgramService {
         }
 
         List<Program> list = programRepository.findAllByUserUserId(userId);
-        return list.stream().map(this::toDto).collect(Collectors.toList());
+        List<ProgramDTO> result = new ArrayList<>();
+
+        for (Program p : list) {
+            result.add(toDto(p));
+        }
+
+        return result;
     }
 
     /**
@@ -145,174 +145,148 @@ public class ProgramService {
     @Transactional(readOnly = true)
     public ProgramDTO getProgramById(Integer userId, Integer programId) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
-        Optional<Program> pOpt = programRepository.findByProgramIdAndUserUserId(programId, userId);
-        if (pOpt.isEmpty()) {
+        Optional<Program> prog = programRepository.findByProgramIdAndUserUserId(programId, userId);
+        if (prog.isEmpty()) {
             throw new NotFoundException("Program not found with id: " + programId);
         }
-        return toDto(pOpt.get());
+        return toDto(prog.get());
     }
 
     /**
-     * Smart filter using Specifications. Accepts a map where keys are field
-     * names and values are filter values. String fields are matched
-     * case-insensitively using LIKE %value% semantics. Deadline accepts
-     * ISO date strings (yyyy-MM-dd) or LocalDate instances for exact match.
+     * Filter programs using simple in-memory filtering. Much simpler than JPA
+     * Specifications.
+     * Accepts a map where keys are field names and values are filter values.
      */
     @Transactional(readOnly = true)
     public List<ProgramDTO> filterPrograms(Integer userId, Map<String, Object> filters) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
         // verify user exists
-        Optional<User> uOpt = userRepository.findById(userId);
-        if (uOpt.isEmpty()) {
+        Optional<User> userTemp = userRepository.findById(userId);
+        if (userTemp.isEmpty()) {
             throw new NotFoundException("User not found with id: " + userId);
         }
 
-        Specification<Program> spec = buildSpecification(userId, filters);
-        List<Program> result = programRepository.findAll(spec);
-        return result.stream().map(this::toDto).collect(Collectors.toList());
+        // Get all programs for the user first
+        List<Program> allPrograms = programRepository.findAllByUserUserId(userId);
+
+        // If no filters, return all programs
+        if (filters == null || filters.isEmpty()) {
+            List<ProgramDTO> dtoList = new ArrayList<>();
+            for (Program p : allPrograms) {
+                dtoList.add(toDto(p));
+            }
+            return dtoList;
+        }
+
+        // Apply filters in memory
+        List<Program> filteredPrograms = new ArrayList<>();
+        for (Program p : allPrograms) {
+            if (matchesFilters(p, filters)) {
+                filteredPrograms.add(p);
+            }
+        }
+
+        // Convert filtered programs to DTOs
+        List<ProgramDTO> dtoList = new ArrayList<>();
+        for (Program p : filteredPrograms) {
+            dtoList.add(toDto(p));
+        }
+
+        return dtoList;
     }
 
     /**
-     * Build a JPA Specification used by filterPrograms.
-     * The resulting specification includes an ownership predicate (user.userId =
-     * userId)
-     * and additional predicates based on the provided filters map.
-     *
-     * Behavior changes:
-     * - For string fields (universityName, fieldOfStudy, focusArea, status,
-     * portal, website, tuition, requirements) a row will only match when the
-     * corresponding column IS NOT NULL and the column (lowercased) contains the
-     * provided filter value (case-insensitive LIKE %%value%%). This ensures rows
-     * with NULL values for that column are not returned when searching for a
-     * non-empty value.
-     * - For deadline the filter requires an exact ISO date string in yyyy-MM-dd
-     * format; the predicate uses exact LocalDate equality. If the provided
-     * deadline cannot be parsed as yyyy-MM-dd a ValidationException is thrown.
-     *
-     * Unknown keys are ignored.
-     *
-     * @param userId  owner id to restrict results to
-     * @param filters map of filterName -> value
-     * @return JPA Specification representing the composed filters
+     * Check if a program matches the given filters.
      */
-    private Specification<Program> buildSpecification(Integer userId, Map<String, Object> filters) {
-        return (root, query, cb) -> {
-            List<Predicate> preds = new ArrayList<>();
-            // ownership predicate
-            preds.add(cb.equal(root.get("user").get("userId"), userId));
+    private boolean matchesFilters(Program program, Map<String, Object> filters) {
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            Object filterValue = entry.getValue();
 
-            if (filters == null || filters.isEmpty()) {
-                return cb.and(preds.toArray(new Predicate[0]));
+            if (filterValue == null || filterValue.toString().isBlank()) {
+                continue; // Skip empty filters
             }
 
-            CriteriaBuilder cbuilder = cb;
+            if (!matchesFilter(program, key, filterValue.toString())) {
+                return false; // If any filter doesn't match, exclude this program
+            }
+        }
+        return true; // All filters matched
+    }
 
-            for (Map.Entry<String, Object> e : filters.entrySet()) {
-                String key = e.getKey();
-                Object raw = e.getValue();
-                if (raw == null)
-                    continue;
+    /**
+     * Check if a program field matches a specific filter value.
+     */
+    private boolean matchesFilter(Program program, String fieldName, String filterValue) {
+        String lowerFilterValue = filterValue.toLowerCase();
 
-                // skip blank string filters
-                if (raw instanceof CharSequence && raw.toString().isBlank())
-                    continue;
-
-                switch (key) {
-                    case "universityName":
-                    case "fieldOfStudy":
-                    case "focusArea":
-                    case "status":
-                    case "portal":
-                    case "website":
-                    case "tuition":
-                    case "requirements": {
-                        String s = raw.toString().toLowerCase();
-                        Path<String> path = root.get(camelToFieldName(key));
-                        // ensure column is not NULL and then perform case-insensitive LIKE
-                        preds.add(cbuilder.isNotNull(path));
-                        preds.add(cbuilder.like(cbuilder.lower(path), "%" + escapeLike(s) + "%"));
-                        break;
-                    }
-                    case "deadline": {
-                        LocalDate d;
-                        if (raw instanceof LocalDate) {
-                            d = (LocalDate) raw;
-                        } else {
-                            try {
-                                // enforce yyyy-MM-dd parsing (ISO_LOCAL_DATE)
-                                d = LocalDate.parse(raw.toString());
-                            } catch (DateTimeParseException ex) {
-                                throw new ValidationException("deadline must be a date in yyyy-MM-dd format");
-                            }
-                        }
-                        // require exact equality; implicit null-check (NULL != d)
-                        preds.add(cbuilder.equal(root.get("deadline"), d));
-                        break;
-                    }
-                    default:
-                        // ignore unknown keys
-                        break;
+        switch (fieldName) {
+            case "universityName":
+                return program.getUniversityName() != null &&
+                        program.getUniversityName().toLowerCase().contains(lowerFilterValue);
+            case "fieldOfStudy":
+                return program.getFieldOfStudy() != null &&
+                        program.getFieldOfStudy().toLowerCase().contains(lowerFilterValue);
+            case "focusArea":
+                return program.getFocusArea() != null &&
+                        program.getFocusArea().toLowerCase().contains(lowerFilterValue);
+            case "status":
+                return program.getStatus() != null &&
+                        program.getStatus().toLowerCase().contains(lowerFilterValue);
+            case "portal":
+                return program.getPortal() != null &&
+                        program.getPortal().toLowerCase().contains(lowerFilterValue);
+            case "website":
+                return program.getWebsite() != null &&
+                        program.getWebsite().toLowerCase().contains(lowerFilterValue);
+            case "tuition":
+                return program.getTuition() != null &&
+                        program.getTuition().toLowerCase().contains(lowerFilterValue);
+            case "requirements":
+                return program.getRequirements() != null &&
+                        program.getRequirements().toLowerCase().contains(lowerFilterValue);
+            case "deadline":
+                try {
+                    LocalDate filterDate = LocalDate.parse(filterValue);
+                    return filterDate.equals(program.getDeadline());
+                } catch (DateTimeParseException e) {
+                    return false; // Invalid date format, no match
                 }
-            }
-
-            return cb.and(preds.toArray(new Predicate[0]));
-        };
-    }
-
-    /**
-     * Convert a camelCase filter key to the matching entity field name.
-     * Currently performs a direct mapping since entity fields use the same names.
-     *
-     * @param key camelCase filter key
-     * @return entity field name to use in criteria paths
-     */
-    private static String camelToFieldName(String key) {
-        // our DTO keys use camelCase and entity fields match those names
-        return key;
-    }
-
-    /**
-     * Escape characters that have special meaning in SQL LIKE patterns.
-     *
-     * @param s input string
-     * @return escaped string safe to use inside a LIKE '%...%' predicate
-     */
-    private static String escapeLike(String s) {
-        // basic escape for SQL like wildcard characters
-        return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+            default:
+                return true; // Unknown field, don't filter
+        }
     }
 
     /**
      * Update a Program that belongs to the given user.
      *
+     * Basic field validation is handled by DTO annotations via @Valid in
+     * controller.
+     * This method enforces business rules like ownership.
+     *
      * @param userId    owner id used for ownership enforcement
      * @param programId id of the program to update
-     * @param dto       update payload; must include universityName
+     * @param dto       update payload; validated by @Valid in controller
      * @return the updated Program as ProgramDTO
-     * @throws ValidationException when dto is null or required fields are missing
-     * @throws NotFoundException   when the program is not found or is not owned by
-     *                             the user
+     * @throws NotFoundException when the program is not found or is not owned by
+     *                           the user
      */
     @Transactional
     public ProgramDTO updateProgram(Integer userId, Integer programId, ProgramUpdateDTO dto) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
-        if (dto == null)
-            throw new ValidationException("request body is required");
-        if (dto.getUniversityName() == null || dto.getUniversityName().isBlank())
-            throw new ValidationException("universityName is required");
 
-        Optional<Program> pOpt = programRepository.findByProgramIdAndUserUserId(programId, userId);
-        if (pOpt.isEmpty()) {
+        Optional<Program> prog = programRepository.findByProgramIdAndUserUserId(programId, userId);
+        if (prog.isEmpty()) {
             throw new NotFoundException("Program not found with id: " + programId);
         }
 
-        Program p = pOpt.get();
+        Program p = prog.get();
         p.setUniversityName(dto.getUniversityName());
         p.setFieldOfStudy(dto.getFieldOfStudy());
         p.setFocusArea(dto.getFocusArea());
@@ -340,7 +314,7 @@ public class ProgramService {
     @Transactional
     public void deleteProgram(Integer userId, Integer programId) {
         if (userId == null) {
-            throw new com.gradapptracker.backend.exception.UnauthorizedException("missing or invalid token");
+            throw new UnauthorizedException("missing or invalid token");
         }
         // First verify the program exists
         Optional<Program> existing = programRepository.findById(programId);
@@ -358,4 +332,3 @@ public class ProgramService {
         programRepository.deleteById(programId);
     }
 }
-

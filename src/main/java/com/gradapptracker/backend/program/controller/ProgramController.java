@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,8 +82,10 @@ public class ProgramController {
     public ResponseEntity<List<ProgramDTO>> filterPrograms(HttpServletRequest req,
             @RequestParam Map<String, String> allParams) {
         Integer userId = extractUserId(req);
-        Map<String, Object> filters = allParams.entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> filters = new HashMap<>();
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            filters.put(entry.getKey(), entry.getValue());
+        }
         List<ProgramDTO> result = programService.filterPrograms(userId, filters);
         return ResponseEntity.ok(result);
     }
@@ -109,4 +112,3 @@ public class ProgramController {
     }
 
 }
-

@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
             code = ((DocumentReferencedException) ex).getCode();
             message = ex.getMessage();
         } else {
-            // Unknown runtime exception â€” log developer-facing message
+            // Unknown runtime exception -> log developer-facing message
             logger.error("Unhandled runtime exception in controller/service/repo: {}", ex.getMessage(), ex);
         }
 

@@ -1,7 +1,5 @@
 package com.gradapptracker.backend.user.service;
 
-import java.util.regex.Pattern;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +33,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -46,50 +42,27 @@ public class UserService {
     /**
      * Register a new user.
      *
-     * <p>
-     * Validates the provided {@code dto} and creates a new {@code User} record.
-     * The method ensures the email is well-formed and not already in use. The
-     * password is hashed before persistence.
+     * Creates a new {@code User} record. Basic field validation is handled by
+     * DTO annotations. This method ensures the email is not already in use and
+     * hashes the password before persistence.
      *
-     * @param dto the registration payload; must contain non-empty name, email
-     *            and password
+     * @param dto the registration payload; validated by @Valid in controller
      * @return a {@link UserResponse} representing the newly created user
-     * @throws ValidationException         if required fields are missing or email
-     *                                     is
-     *                                     malformed
      * @throws EmailAlreadyExistsException if the email is already registered
      * @implNote this method lower-cases the email before storing it.
      */
     public UserResponse register(UserRegisterRequest dto) {
-        if (dto == null) {
-            throw new ValidationException("request body is required");
-        }
+        String email = dto.getEmail().trim().toLowerCase();
 
-        String name = dto.getName();
-        String email = dto.getEmail();
-        String password = dto.getPassword();
-
-        if (name == null || name.trim().isEmpty()) {
-            throw new ValidationException("name is required");
-        }
-        if (email == null || email.trim().isEmpty()) {
-            throw new ValidationException("email is required");
-        }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new ValidationException("email is invalid");
-        }
-        if (password == null || password.trim().isEmpty()) {
-            throw new ValidationException("password is required");
-        }
-
+        // Business rule validation: check email uniqueness
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException("Email already exists: " + email);
         }
 
         User user = new User();
-        user.setName(name.trim());
-        user.setEmail(email.trim().toLowerCase());
-        user.setPassword(passwordEncoder.encode(password));
+        user.setName(dto.getName().trim());
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         User saved = userRepository.save(user);
 
@@ -204,16 +177,14 @@ public class UserService {
      * Update mutable fields of an existing user.
      *
      * <p>
-     * Fields not present in {@code dto} are left unchanged. When the email
-     * is changed the method checks uniqueness and will throw
-     * {@link EmailAlreadyExistsException} if another account uses that email.
-     * Password updates are hashed before persistence.
+     * Fields not present in {@code dto} are left unchanged. Basic field validation
+     * is handled by DTO annotations. This method enforces business rules like
+     * email uniqueness.
      *
      * @param id  the id of the user to update
      * @param dto the payload with fields to update (name, email, password)
      * @return the updated {@link UserResponse}
      * @throws NotFoundException           if the user does not exist
-     * @throws ValidationException         if provided fields are invalid
      * @throws EmailAlreadyExistsException if the new email is already used by
      *                                     another account
      */
@@ -225,20 +196,13 @@ public class UserService {
         User user = maybe.get();
 
         // name
-        if (dto.getName() != null) {
-            String name = dto.getName().trim();
-            if (name.isEmpty()) {
-                throw new ValidationException("name cannot be empty");
-            }
-            user.setName(name);
+        if (dto.getName() != null && !dto.getName().trim().isEmpty()) {
+            user.setName(dto.getName().trim());
         }
 
-        // email
-        if (dto.getEmail() != null) {
+        // email - business rule: check uniqueness
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
             String email = dto.getEmail().trim().toLowerCase();
-            if (!EMAIL_PATTERN.matcher(email).matches()) {
-                throw new ValidationException("email is invalid");
-            }
             if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
                 throw new EmailAlreadyExistsException("Email already exists: " + email);
             }
@@ -246,12 +210,8 @@ public class UserService {
         }
 
         // password
-        if (dto.getPassword() != null) {
-            String pw = dto.getPassword();
-            if (pw.trim().isEmpty()) {
-                throw new ValidationException("password cannot be empty");
-            }
-            user.setPassword(passwordEncoder.encode(pw));
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         User saved = userRepository.save(user);
@@ -319,4 +279,3 @@ public class UserService {
     }
 
 }
-

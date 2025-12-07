@@ -14,6 +14,8 @@ import com.gradapptracker.backend.exception.NotFoundException;
 import com.gradapptracker.backend.exception.ValidationException;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.UUID;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -342,6 +343,40 @@ public class DocumentService {
         }
 
         return dtoList;
+    }
+
+    /**
+     * Retrieve documents for a user with pagination support.
+     *
+     * @param authenticatedUserId id of the caller
+     * @param userId              id of the user whose documents to fetch
+     * @param pageable            pagination parameters (page number, size, sorting)
+     * @return Page of DocumentResponseDTO
+     */
+    @Transactional(readOnly = true)
+    public Page<DocumentResponseDTO> getAllByUser(Integer authenticatedUserId,
+            Integer userId, Pageable pageable) {
+        if (!authenticatedUserId.equals(userId)) {
+            throw new ForbiddenException("not authorized to view documents for this user");
+        }
+
+        Optional<User> uOpt = userRepository.findById(userId);
+        if (uOpt.isEmpty()) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+
+        Page<Document> page = documentRepository.findByUserUserId(userId, pageable);
+
+        return page.map(d -> {
+            DocumentResponseDTO dto = new DocumentResponseDTO();
+            dto.setDocumentId(d.getDocumentId());
+            dto.setUserId(d.getUser() != null ? d.getUser().getUserId() : null);
+            dto.setFileName(d.getFileName());
+            dto.setFilePath(d.getFilePath());
+            dto.setDocType(d.getDocType());
+            dto.setNotes(d.getNotes());
+            return dto;
+        });
     }
 
     /**

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.SubScene?>
+
+<!--
+  Dashboard3DView.fxml
+  Interactive 3D visualization of program statistics.
+  Shows application status distribution using animated 3D bars.
+-->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.Dashboard3DController" stylesheets="@/styles/styles.css" fitToWidth="true" fitToHeight="true" styleClass="page-background">
+  <content>
+    <VBox spacing="20" styleClass="page-content">
+
+      <!-- Page Header -->
+      <VBox spacing="10" styleClass="content-card">
+        <Label text="3D Analytics Dashboard" styleClass="section-title,dashboard-title" />
+        <Label text="Interactive visualization of your application statistics" styleClass="dashboard-subtitle" />
+
+        <!-- Instructions -->
+        <HBox spacing="15" styleClass="instructions-container">
+          <VBox spacing="4">
+            <Label text="Drag" styleClass="instruction-label-bold" />
+            <Label text="Rotate view" styleClass="instruction-label-text" />
+          </VBox>
+          <VBox spacing="4">
+            <Label text="Click Bar" styleClass="instruction-label-bold" />
+            <Label text="View details" styleClass="instruction-label-text" />
+          </VBox>
+          <VBox spacing="4">
+            <Label text="Hover" styleClass="instruction-label-bold" />
+            <Label text="Highlight" styleClass="instruction-label-text" />
+          </VBox>
+        </HBox>
+      </VBox>
+
+      <!-- Statistics Summary Cards -->
+      <HBox spacing="15">
+        <VBox styleClass="content-card,stat-card-pink" spacing="8" HBox.hgrow="ALWAYS" alignment="CENTER">
+          <Label text="Total Programs" styleClass="stat-card-label" />
+          <Label fx:id="lblTotalPrograms" text="0" styleClass="stat-card-value" />
+        </VBox>
+
+        <VBox styleClass="content-card,stat-card-purple" spacing="8" HBox.hgrow="ALWAYS" alignment="CENTER">
+          <Label text="Total Documents" styleClass="stat-card-label" />
+          <Label fx:id="lblTotalDocuments" text="0" styleClass="stat-card-value" />
+        </VBox>
+      </HBox>
+
+      <!-- 3D Visualization Container -->
+      <VBox styleClass="content-card" spacing="15" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" spacing="12">
+          <Label text="Application Status Distribution (3D)" styleClass="section-title" />
+          <Region HBox.hgrow="ALWAYS" />
+          <Button text="Refresh Data" fx:id="btnRefresh" onAction="#onRefresh" styleClass="button-secondary" prefWidth="120" />
+        </HBox>
+
+        <!-- 3D SubScene Container -->
+        <StackPane fx:id="subSceneContainer" prefHeight="500" minHeight="400" styleClass="scene-container">
+          <!-- SubScene will be added programmatically -->
+        </StackPane>
+
+        <!-- Status Legend -->
+        <HBox spacing="20" alignment="CENTER" styleClass="legend-container">
+          <HBox spacing="6" alignment="CENTER">
+            <Label text="●" styleClass="legend-bullet-accepted" />
+            <Label text="Accepted" styleClass="legend-label" />
+          </HBox>
+          <HBox spacing="6" alignment="CENTER">
+            <Label text="●" styleClass="legend-bullet-applied" />
+            <Label text="Applied" styleClass="legend-label" />
+          </HBox>
+          <HBox spacing="6" alignment="CENTER">
+            <Label text="●" styleClass="legend-bullet-inprogress" />
+            <Label text="In Progress" styleClass="legend-label" />
+          </HBox>
+          <HBox spacing="6" alignment="CENTER">
+            <Label text="●" styleClass="legend-bullet-rejected" />
+            <Label text="Rejected" styleClass="legend-label" />
+          </HBox>
+          <HBox spacing="6" alignment="CENTER">
+            <Label text="●" styleClass="legend-bullet-other" />
+            <Label text="Other" styleClass="legend-label" />
+          </HBox>
+        </HBox>
+      </VBox>
+
+      <!-- Details Panel -->
+      <VBox fx:id="detailsPanel" styleClass="content-card" spacing="10" visible="false" managed="false">
+        <Label text="Selected Status Details" styleClass="details-panel-title" />
+        <HBox spacing="10">
+          <Label text="Status:" styleClass="details-label-bold" />
+          <Label fx:id="lblSelectedStatus" text="-" />
+        </HBox>
+        <HBox spacing="10">
+          <Label text="Count:" styleClass="details-label-bold" />
+          <Label fx:id="lblSelectedCount" text="0" />
+        </HBox>
+        <HBox spacing="10">
+          <Label text="Percentage:" styleClass="details-label-bold" />
+          <Label fx:id="lblSelectedPercentage" text="0%" />
+        </HBox>
+      </VBox>
+
+    </VBox>
+  </content>
+</ScrollPane>

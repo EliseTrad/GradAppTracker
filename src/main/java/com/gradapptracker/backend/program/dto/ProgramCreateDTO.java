@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Request DTO for creating a new graduate program.
+ * <p>
+ * University name is required. Other fields are optional but recommended
+ * for comprehensive tracking. Status must be one of the ApplicationStatus
+ * enum values. User ID is set by the service layer from authentication context.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

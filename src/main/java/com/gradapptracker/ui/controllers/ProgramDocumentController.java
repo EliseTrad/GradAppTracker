@@ -3,6 +3,7 @@ package com.gradapptracker.ui.controllers;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentCreateDTO;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentDTO;
 import com.gradapptracker.ui.services.ProgramDocumentServiceFx;
+import com.gradapptracker.ui.services.ServiceLocator;
 import com.gradapptracker.ui.utils.AlertUtils;
 import com.gradapptracker.ui.utils.AsyncUtils;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -22,7 +23,7 @@ import javafx.scene.image.ImageView;
  */
 public class ProgramDocumentController {
 
-    private final ProgramDocumentServiceFx service = new ProgramDocumentServiceFx();
+    private final ProgramDocumentServiceFx service = ServiceLocator.getInstance().getProgramDocumentService();
     private final ObservableList<ProgramDocumentDTO> items = FXCollections.observableArrayList();
 
     @FXML

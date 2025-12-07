@@ -9,34 +9,29 @@
   Main application layout with header, footer, navigation, and content area.
   Navigation panel appears only after login.
 -->
-<BorderPane xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.gradapptracker.ui.controllers.MainLayoutController" 
-            stylesheets="@/styles/styles.css">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.MainLayoutController" stylesheets="@/styles/styles.css">
 
   <!-- Header -->
   <top>
     <HBox styleClass="header" alignment="CENTER_LEFT" spacing="10">
       <children>
         <!-- Logo -->
-        <StackPane prefWidth="40" prefHeight="40" style="-fx-background-color: transparent;">
+        <StackPane prefWidth="40" prefHeight="40" styleClass="logo-container">
           <ImageView fx:id="logoImage" fitWidth="40" fitHeight="40" preserveRatio="true">
             <!-- Logo image will be loaded programmatically -->
             <!-- Place your logo.png in: src/main/resources/images/logo.png -->
           </ImageView>
-          <Label text="LOGO" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" 
-                 fx:id="logoPlaceholder"/>
+          <Label text="LOGO" styleClass="logo-placeholder" fx:id="logoPlaceholder" />
         </StackPane>
-        
+
         <Label text="GradAppTracker" styleClass="header-title" />
-        
+
         <Region HBox.hgrow="ALWAYS" />
-        
+
         <!-- User info area (visible after login) -->
         <HBox fx:id="userInfoBox" spacing="8" alignment="CENTER_RIGHT" visible="false" managed="false">
-          <Label fx:id="lblUserName" text="" style="-fx-text-fill: white; -fx-font-size: 13px;" />
-          <Button fx:id="btnHeaderLogout" text="Logout" onAction="#onLogout" 
-                  style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-padding: 5 12; -fx-font-size: 12px;" />
+          <Label fx:id="lblUserName" text="" styleClass="header-username" />
+          <Button fx:id="btnHeaderLogout" text="Logout" onAction="#onLogout" styleClass="header-logout-button" />
         </HBox>
       </children>
       <padding>
@@ -52,24 +47,22 @@
       <VBox fx:id="navigationPanel" styleClass="nav-panel" visible="false" managed="false">
         <children>
           <Label text="MAIN MENU" styleClass="nav-section-title" />
-          
-          <Button fx:id="btnNavDashboard" text="Dashboard" styleClass="nav-button" 
-                  onAction="#onNavigateDashboard" />
-          
-          <Button fx:id="btnNavDocuments" text="Documents" styleClass="nav-button" 
-                  onAction="#onNavigateDocuments" />
-          
+
+          <Button fx:id="btnNavDashboard" text="Dashboard" styleClass="nav-button" onAction="#onNavigateDashboard" />
+
+          <Button fx:id="btnNav3DDashboard" text="3D Analytics" styleClass="nav-button" onAction="#onNavigate3DDashboard" />
+
+          <Button fx:id="btnNavDocuments" text="Documents" styleClass="nav-button" onAction="#onNavigateDocuments" />
+
           <Separator />
-          
+
           <Label text="ACCOUNT" styleClass="nav-section-title" />
-          
-          <Button fx:id="btnNavProfile" text="Profile" styleClass="nav-button" 
-                  onAction="#onNavigateProfile" />
-          
+
+          <Button fx:id="btnNavProfile" text="Profile" styleClass="nav-button" onAction="#onNavigateProfile" />
+
           <Region VBox.vgrow="ALWAYS" />
-          
-          <Button fx:id="btnNavLogout" text="Sign Out" styleClass="nav-button button-danger" 
-                  onAction="#onLogout" />
+
+          <Button fx:id="btnNavLogout" text="Sign Out" styleClass="nav-button button-danger" onAction="#onLogout" />
         </children>
       </VBox>
 
@@ -84,8 +77,7 @@
   <bottom>
     <HBox styleClass="footer" alignment="CENTER">
       <children>
-        <Label text="© 2025 GradAppTracker. Empowering your academic dreams." 
-               style="-fx-text-fill: white; -fx-font-size: 12px;" />
+        <Label text="© 2025 GradAppTracker. Empowering your academic dreams." styleClass="footer-text" />
       </children>
     </HBox>
   </bottom>

@@ -3,6 +3,12 @@ package com.gradapptracker.backend.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Request DTO for updating user profile information.
+ * <p>
+ * All fields are optional. Only provided fields will be updated.
+ * Email must be valid if provided. Password must be at least 8 characters.
+ */
 public class UserUpdateRequest {
     private String name;
 
@@ -39,4 +45,3 @@ public class UserUpdateRequest {
         this.password = password;
     }
 }
-

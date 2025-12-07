@@ -50,6 +50,9 @@ public class MainLayoutController {
     private Button btnNavDashboard;
 
     @FXML
+    private Button btnNav3DDashboard;
+
+    @FXML
     private Button btnNavDocuments;
 
     @FXML
@@ -166,6 +169,17 @@ public class MainLayoutController {
     private void onNavigateDashboard() {
         setContent("/com/gradapptracker/ui/views/ProgramView.fxml");
         setActiveNavButton(btnNavDashboard);
+    }
+
+    @FXML
+    private void onNavigate3DDashboard() {
+        // Check authentication before navigating to 3D dashboard
+        if (!UserSession.getInstance().isAuthenticated()) {
+            AlertUtils.error("Authentication Required", "Please log in to access 3D Analytics.");
+            return;
+        }
+        setContent("/com/gradapptracker/ui/views/Dashboard3DView.fxml");
+        setActiveNavButton(btnNav3DDashboard);
     }
 
     @FXML

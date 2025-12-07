@@ -7,21 +7,21 @@
   ProfileView.fxml
   User profile management - view/update user info, change password, logout, delete account.
 -->
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.ProfileController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" style="-fx-background-color: #f8f9fa; -fx-background: #f8f9fa;">
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.ProfileController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" styleClass="page-background">
   <content>
-    <VBox spacing="20" style="-fx-background-color: #f8f9fa;">
+    <VBox spacing="20" styleClass="page-background">
 
       <children>
         <!-- Page Title -->
-        <Label text="Profile Settings" styleClass="section-title" style="-fx-font-size: 24px;" />
+        <Label text="Profile Settings" styleClass="section-title,page-title" />
 
         <!-- User Information Section -->
         <VBox styleClass="content-card" spacing="20">
           <Label text="Account Information" styleClass="section-title" />
 
           <HBox styleClass="alert-info" spacing="10" alignment="CENTER_LEFT">
-            <Label text="👤" style="-fx-font-size: 20px;" />
-            <Label text="Manage your account details and preferences." style="-fx-text-fill: #424242;" />
+            <Label text="👤" styleClass="profile-icon" />
+            <Label text="Manage your account details and preferences." styleClass="info-text" />
           </HBox>
 
           <!-- User Info Form -->
@@ -49,8 +49,8 @@
           <Label text="Change Password" styleClass="section-title" />
 
           <HBox styleClass="alert-warning" spacing="10" alignment="CENTER_LEFT">
-            <Label text="🔒" style="-fx-font-size: 20px;" />
-            <Label text="Choose a strong password with at least 8 characters." style="-fx-text-fill: #424242;" />
+            <Label text="🔒" styleClass="profile-icon" />
+            <Label text="Choose a strong password with at least 8 characters." styleClass="info-text" />
           </HBox>
 
           <!-- Password Change Form -->
@@ -79,8 +79,8 @@
 
           <!-- Sign Out -->
           <VBox spacing="10">
-            <Label text="Sign Out" style="-fx-font-weight: bold; -fx-text-fill: #424242;" />
-            <Label text="Sign out of your account. You can log back in anytime." style="-fx-text-fill: #757575; -fx-font-size: 13px;" />
+            <Label text="Sign Out" styleClass="info-text-bold" />
+            <Label text="Sign out of your account. You can log back in anytime." styleClass="tip-label" />
             <Button text="🚪 Sign Out" fx:id="btnSignOut" onAction="#onSignOut" styleClass="button-warning" prefWidth="160" minWidth="160" />
           </VBox>
 
@@ -88,8 +88,8 @@
 
           <!-- Delete Account -->
           <VBox spacing="10">
-            <Label text="Delete Account" style="-fx-font-weight: bold; -fx-text-fill: #f44336;" />
-            <Label text="⚠️ Warning: This action is permanent and cannot be undone. All your data will be deleted." wrapText="true" maxWidth="600" style="-fx-text-fill: #757575; -fx-font-size: 13px;" />
+            <Label text="Delete Account" styleClass="danger-text-bold" />
+            <Label text="⚠️ Warning: This action is permanent and cannot be undone. All your data will be deleted." wrapText="true" maxWidth="600" styleClass="tip-label" />
             <Button text="Delete My Account" fx:id="btnDeleteAccount" onAction="#onDeleteAccount" styleClass="button-danger" prefWidth="200" minWidth="200" />
           </VBox>
         </VBox>

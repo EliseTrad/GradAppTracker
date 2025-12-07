@@ -1,5 +1,11 @@
 package com.gradapptracker.backend.user.dto;
 
+/**
+ * Response DTO for user information.
+ * <p>
+ * Contains safe user data for API responses, excluding sensitive information
+ * like passwords. Used after registration, login, and profile updates.
+ */
 public class UserResponse {
     private Integer userId;
     private String name;
@@ -38,4 +44,3 @@ public class UserResponse {
         this.email = email;
     }
 }
-

@@ -262,20 +262,33 @@ public class UserService {
     }
 
     /**
-     * Delete a user by id.
+     * Delete a user by id with authorization check.
      *
-     * @param id the id of the user to delete
-     * @throws NotFoundException if the user does not exist
+     * @param authenticatedUserId the id of the user making the request
+     * @param targetUserId        the id of the user to delete
+     * @throws NotFoundException     if the user does not exist
+     * @throws UnauthorizedException if the authenticated user is not authorized to
+     *                               delete the target user
      * @implNote cascading deletes are handled by the database schema (ON
      *           DELETE CASCADE). The service does not attempt to translate
-     *           foreign-key errors here.
+     *           foreign-key errors here. Users can only delete their own account.
      */
-    public void deleteUser(Integer id) {
-        var user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            throw new NotFoundException("User not found with id: " + id);
+    public void deleteUser(Integer authenticatedUserId, Integer targetUserId) {
+        if (authenticatedUserId == null) {
+            throw new UnauthorizedException("missing or invalid token");
         }
-        userRepository.deleteById(id);
+
+        var targetUser = userRepository.findById(targetUserId);
+        if (targetUser.isEmpty()) {
+            throw new NotFoundException("User not found with id: " + targetUserId);
+        }
+
+        // Business rule: users can only delete their own account
+        if (!authenticatedUserId.equals(targetUserId)) {
+            throw new UnauthorizedException("not authorized to delete this user");
+        }
+
+        userRepository.deleteById(targetUserId);
     }
 
 }

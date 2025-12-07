@@ -11,6 +11,19 @@ import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * Utility component for JWT token generation, parsing, and validation.
+ * <p>
+ * Handles all JWT operations including:
+ * <ul>
+ * <li>Token generation with user ID and username claims</li>
+ * <li>Token validation and signature verification</li>
+ * <li>Extracting user information from tokens</li>
+ * </ul>
+ * <p>
+ * Uses HMAC-SHA256 signing algorithm with a secret key configured in
+ * application.properties. Tokens expire after a configurable duration.
+ */
 @Component
 public class JwtUtils {
 
@@ -100,4 +113,3 @@ public class JwtUtils {
         return false;
     }
 }
-

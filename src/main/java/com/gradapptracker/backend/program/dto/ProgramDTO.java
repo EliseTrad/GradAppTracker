@@ -6,6 +6,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object for graduate program information.
+ * <p>
+ * Represents a complete graduate school application program with all
+ * associated metadata including university details, deadlines, status,
+ * and applicant notes. Used for API responses and data transfer between
+ * backend and frontend.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

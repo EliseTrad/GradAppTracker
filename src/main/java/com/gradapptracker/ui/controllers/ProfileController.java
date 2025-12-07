@@ -2,6 +2,7 @@ package com.gradapptracker.ui.controllers;
 
 import com.gradapptracker.backend.user.dto.UserUpdateRequest;
 import com.gradapptracker.ui.services.UserServiceFx;
+import com.gradapptracker.ui.services.ServiceLocator;
 import com.gradapptracker.ui.utils.AlertUtils;
 import com.gradapptracker.ui.utils.AsyncUtils;
 import com.gradapptracker.ui.utils.UserSession;
@@ -47,7 +48,7 @@ public class ProfileController {
     @FXML
     private Button btnDeleteAccount;
 
-    private final UserServiceFx userService = new UserServiceFx();
+    private final UserServiceFx userService = ServiceLocator.getInstance().getUserService();
 
     @FXML
     public void initialize() {

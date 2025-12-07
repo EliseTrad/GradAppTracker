@@ -3,24 +3,33 @@ package com.gradapptracker.backend.program.service;
 import com.gradapptracker.backend.program.dto.ProgramCreateDTO;
 import com.gradapptracker.backend.program.dto.ProgramDTO;
 import com.gradapptracker.backend.program.dto.ProgramUpdateDTO;
+import com.gradapptracker.backend.program.entity.ApplicationStatus;
 import com.gradapptracker.backend.program.entity.Program;
 import com.gradapptracker.backend.program.repository.ProgramRepository;
 import com.gradapptracker.backend.user.entity.User;
 import com.gradapptracker.backend.user.repository.UserRepository;
+import com.gradapptracker.backend.document.repository.DocumentRepository;
+import com.gradapptracker.backend.shared.dto.DashboardStatsDTO;
 import com.gradapptracker.backend.exception.ForbiddenException;
 import com.gradapptracker.backend.exception.NotFoundException;
 import com.gradapptracker.backend.exception.UnauthorizedException;
+import com.gradapptracker.backend.exception.ValidationException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProgramService {
@@ -38,10 +47,13 @@ public class ProgramService {
 
     private final ProgramRepository programRepository;
     private final UserRepository userRepository;
+    private final DocumentRepository documentRepository;
 
-    public ProgramService(ProgramRepository programRepository, UserRepository userRepository) {
+    public ProgramService(ProgramRepository programRepository, UserRepository userRepository,
+            DocumentRepository documentRepository) {
         this.programRepository = programRepository;
         this.userRepository = userRepository;
+        this.documentRepository = documentRepository;
     }
 
     /**
@@ -57,7 +69,7 @@ public class ProgramService {
         dto.setPortal(p.getPortal());
         dto.setWebsite(p.getWebsite());
         dto.setDeadline(p.getDeadline());
-        dto.setStatus(p.getStatus());
+        dto.setStatus(p.getStatus() != null ? p.getStatus().getDisplayName() : null);
         dto.setTuition(p.getTuition());
         dto.setRequirements(p.getRequirements());
         dto.setNotes(p.getNotes());
@@ -96,7 +108,7 @@ public class ProgramService {
         p.setPortal(dto.getPortal());
         p.setWebsite(dto.getWebsite());
         p.setDeadline(dto.getDeadline());
-        p.setStatus(dto.getStatus());
+        p.setStatus(ApplicationStatus.fromString(dto.getStatus()));
         p.setTuition(dto.getTuition());
         p.setRequirements(dto.getRequirements());
         p.setNotes(dto.getNotes());
@@ -134,6 +146,29 @@ public class ProgramService {
     }
 
     /**
+     * Retrieve programs that belong to a given user with pagination support.
+     *
+     * @param userId   owner id whose programs will be returned
+     * @param pageable pagination parameters (page number, size, sorting)
+     * @return Page of ProgramDTO for the given user
+     * @throws NotFoundException when the userId does not exist
+     */
+    @Transactional(readOnly = true)
+    public Page<ProgramDTO> getAllProgramsByUser(Integer userId, Pageable pageable) {
+        if (userId == null) {
+            throw new UnauthorizedException("missing or invalid token");
+        }
+        // verify user exists
+        Optional<User> uOpt = userRepository.findById(userId);
+        if (uOpt.isEmpty()) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+
+        Page<Program> page = programRepository.findAllByUserUserId(userId, pageable);
+        return page.map(this::toDto);
+    }
+
+    /**
      * Retrieve a single Program for a user, enforcing ownership.
      *
      * @param userId    owner id used for ownership verification
@@ -155,9 +190,17 @@ public class ProgramService {
     }
 
     /**
-     * Filter programs using simple in-memory filtering. Much simpler than JPA
-     * Specifications.
+     * Filter programs using JPA Specifications for database-level filtering.
+     * This is more efficient for large datasets as filtering occurs in the
+     * database.
      * Accepts a map where keys are field names and values are filter values.
+     *
+     * @param userId  owner id whose programs will be filtered
+     * @param filters map of field names to filter values (case-insensitive contains
+     *                for strings, exact match for dates)
+     * @return list of ProgramDTO matching the filters
+     * @throws UnauthorizedException when userId is null
+     * @throws NotFoundException     when the userId does not exist
      */
     @Transactional(readOnly = true)
     public List<ProgramDTO> filterPrograms(Integer userId, Map<String, Object> filters) {
@@ -170,27 +213,13 @@ public class ProgramService {
             throw new NotFoundException("User not found with id: " + userId);
         }
 
-        // Get all programs for the user first
-        List<Program> allPrograms = programRepository.findAllByUserUserId(userId);
+        // Build specification from filters
+        Specification<Program> spec = buildFilterSpecification(userId, filters);
 
-        // If no filters, return all programs
-        if (filters == null || filters.isEmpty()) {
-            List<ProgramDTO> dtoList = new ArrayList<>();
-            for (Program p : allPrograms) {
-                dtoList.add(toDto(p));
-            }
-            return dtoList;
-        }
+        // Execute query with specification
+        List<Program> filteredPrograms = programRepository.findAll(spec);
 
-        // Apply filters in memory
-        List<Program> filteredPrograms = new ArrayList<>();
-        for (Program p : allPrograms) {
-            if (matchesFilters(p, filters)) {
-                filteredPrograms.add(p);
-            }
-        }
-
-        // Convert filtered programs to DTOs
+        // Convert to DTOs
         List<ProgramDTO> dtoList = new ArrayList<>();
         for (Program p : filteredPrograms) {
             dtoList.add(toDto(p));
@@ -200,64 +229,81 @@ public class ProgramService {
     }
 
     /**
-     * Check if a program matches the given filters.
+     * Build a JPA Specification from the given filters.
+     * All filters are combined with AND logic.
+     *
+     * @param userId  owner id to filter by
+     * @param filters map of field names to filter values
+     * @return Specification combining all filters
      */
-    private boolean matchesFilters(Program program, Map<String, Object> filters) {
-        for (Map.Entry<String, Object> entry : filters.entrySet()) {
-            String key = entry.getKey();
-            Object filterValue = entry.getValue();
+    private Specification<Program> buildFilterSpecification(Integer userId, Map<String, Object> filters) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-            if (filterValue == null || filterValue.toString().isBlank()) {
-                continue; // Skip empty filters
+            // Always filter by userId
+            predicates.add(criteriaBuilder.equal(root.get("user").get("userId"), userId));
+
+            // Apply additional filters if provided
+            if (filters != null && !filters.isEmpty()) {
+                for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                    String fieldName = entry.getKey();
+                    Object filterValue = entry.getValue();
+
+                    // Skip null or blank filters
+                    if (filterValue == null || filterValue.toString().isBlank()) {
+                        continue;
+                    }
+
+                    Predicate predicate = createPredicate(root, criteriaBuilder, fieldName, filterValue.toString());
+                    if (predicate != null) {
+                        predicates.add(predicate);
+                    }
+                }
             }
 
-            if (!matchesFilter(program, key, filterValue.toString())) {
-                return false; // If any filter doesn't match, exclude this program
-            }
-        }
-        return true; // All filters matched
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     /**
-     * Check if a program field matches a specific filter value.
+     * Create a predicate for a specific field and filter value.
+     * String fields use case-insensitive LIKE matching.
+     * Date fields use exact equality matching.
+     *
+     * @param root            the root entity
+     * @param criteriaBuilder the criteria builder
+     * @param fieldName       the field to filter on
+     * @param filterValue     the value to filter by
+     * @return a Predicate for the field, or null if the field is unknown or invalid
      */
-    private boolean matchesFilter(Program program, String fieldName, String filterValue) {
-        String lowerFilterValue = filterValue.toLowerCase();
-
+    private Predicate createPredicate(jakarta.persistence.criteria.Root<Program> root,
+            jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder,
+            String fieldName, String filterValue) {
         switch (fieldName) {
             case "universityName":
-                return program.getUniversityName() != null &&
-                        program.getUniversityName().toLowerCase().contains(lowerFilterValue);
             case "fieldOfStudy":
-                return program.getFieldOfStudy() != null &&
-                        program.getFieldOfStudy().toLowerCase().contains(lowerFilterValue);
             case "focusArea":
-                return program.getFocusArea() != null &&
-                        program.getFocusArea().toLowerCase().contains(lowerFilterValue);
             case "status":
-                return program.getStatus() != null &&
-                        program.getStatus().toLowerCase().contains(lowerFilterValue);
             case "portal":
-                return program.getPortal() != null &&
-                        program.getPortal().toLowerCase().contains(lowerFilterValue);
             case "website":
-                return program.getWebsite() != null &&
-                        program.getWebsite().toLowerCase().contains(lowerFilterValue);
             case "tuition":
-                return program.getTuition() != null &&
-                        program.getTuition().toLowerCase().contains(lowerFilterValue);
             case "requirements":
-                return program.getRequirements() != null &&
-                        program.getRequirements().toLowerCase().contains(lowerFilterValue);
+                // Case-insensitive LIKE match for string fields
+                return criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get(fieldName)),
+                        "%" + filterValue.toLowerCase() + "%");
             case "deadline":
+                // Exact match for date fields
                 try {
                     LocalDate filterDate = LocalDate.parse(filterValue);
-                    return filterDate.equals(program.getDeadline());
+                    return criteriaBuilder.equal(root.get("deadline"), filterDate);
                 } catch (DateTimeParseException e) {
-                    return false; // Invalid date format, no match
+                    // Invalid date format, skip this filter
+                    return null;
                 }
             default:
-                return true; // Unknown field, don't filter
+                // Unknown field, skip
+                return null;
         }
     }
 
@@ -293,7 +339,7 @@ public class ProgramService {
         p.setPortal(dto.getPortal());
         p.setWebsite(dto.getWebsite());
         p.setDeadline(dto.getDeadline());
-        p.setStatus(dto.getStatus());
+        p.setStatus(ApplicationStatus.fromString(dto.getStatus()));
         p.setTuition(dto.getTuition());
         p.setRequirements(dto.getRequirements());
         p.setNotes(dto.getNotes());
@@ -330,5 +376,41 @@ public class ProgramService {
         }
 
         programRepository.deleteById(programId);
+    }
+
+    /**
+     * Get aggregated dashboard statistics for a user's programs.
+     * 
+     * @param userId the ID of the user
+     * @return DashboardStatsDTO containing program statistics
+     */
+    @Transactional(readOnly = true)
+    public DashboardStatsDTO getDashboardStats(Integer userId) {
+        if (userId == null) {
+            throw new ValidationException("User ID cannot be null");
+        }
+
+        // Verify user exists
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+
+        // Get all programs for the user
+        List<Program> programs = programRepository.findAllByUserUserId(userId);
+
+        // Calculate total programs
+        int totalPrograms = programs.size();
+
+        // Calculate total documents for the user
+        long totalDocuments = documentRepository.findByUserUserId(userId).size();
+
+        // Count programs by status
+        Map<String, Integer> statusCounts = new HashMap<>();
+        for (Program program : programs) {
+            String status = program.getStatus() != null ? program.getStatus().getDisplayName() : "Other";
+            statusCounts.put(status, statusCounts.getOrDefault(status, 0) + 1);
+        }
+
+        return new DashboardStatsDTO(totalPrograms, (int) totalDocuments, statusCounts);
     }
 }

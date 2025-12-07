@@ -6,11 +6,10 @@ import com.gradapptracker.backend.user.dto.UserRegisterRequest;
 import com.gradapptracker.backend.user.dto.UserResponse;
 import com.gradapptracker.backend.user.dto.UserUpdateRequest;
 import com.gradapptracker.backend.user.service.UserService;
-import com.gradapptracker.backend.exception.UnauthorizedException;
+import com.gradapptracker.backend.security.JwtUtils;
 
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import jakarta.validation.Valid;
@@ -32,9 +31,17 @@ import org.springframework.validation.annotation.Validated;
 public class UserController {
 
 	private final UserService userService;
+	private final JwtUtils jwtUtils;
 
-	public UserController(UserService userService) {
+	public UserController(UserService userService, JwtUtils jwtUtils) {
 		this.userService = userService;
+		this.jwtUtils = jwtUtils;
+	}
+
+	private Integer extractUserId(HttpServletRequest req) {
+		String auth = req.getHeader("Authorization");
+		String token = (auth != null && auth.startsWith("Bearer ")) ? auth.substring(7) : auth;
+		return jwtUtils.getUserIdFromToken(token);
 	}
 
 	/**
@@ -59,7 +66,6 @@ public class UserController {
 		return userService.login(req.getEmail(), req.getPassword());
 	}
 
-	
 	/**
 	 * Get a user by id.
 	 */
@@ -102,20 +108,12 @@ public class UserController {
 	}
 
 	/**
-	 * Delete a user by id.
+	 * Delete a user by id. Authorization check is performed in the service layer.
 	 */
 	@DeleteMapping("/{id}")
-	public void deleteUser(@PathVariable Integer id) {
-		// Ensure the caller can only delete their own account (or be granted a higher
-		// role)
-		UserResponse target = userService.getById(id);
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String currentUsername = (auth == null) ? null : auth.getName();
-		if (currentUsername == null || !currentUsername.equalsIgnoreCase(target.getEmail())) {
-			throw new UnauthorizedException("not authorized to delete this user");
-		}
-		userService.deleteUser(id);
+	public void deleteUser(HttpServletRequest req, @PathVariable Integer id) {
+		Integer authenticatedUserId = extractUserId(req);
+		userService.deleteUser(authenticatedUserId, id);
 	}
 
 }
-

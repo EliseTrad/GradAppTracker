@@ -4,6 +4,14 @@ import com.gradapptracker.backend.user.entity.User;
 
 import jakarta.persistence.*;
 
+/**
+ * JPA entity representing an uploaded document.
+ * <p>
+ * Maps to the "documents" table. Each document belongs to one user and can
+ * be linked to multiple programs through the program_documents junction table.
+ * Files are stored on the filesystem; this entity stores metadata and file
+ * path.
+ */
 @Entity
 @Table(name = "documents")
 public class Document {
@@ -80,4 +88,3 @@ public class Document {
         this.notes = notes;
     }
 }
-

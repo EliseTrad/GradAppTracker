@@ -8,13 +8,13 @@
   Full CRUD management for graduate programs.
   Shows all program fields except IDs.
 -->
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.ProgramController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" style="-fx-background-color: #f8f9fa; -fx-background: #f8f9fa;">
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.ProgramController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" styleClass="page-background">
   <content>
-    <VBox spacing="20" style="-fx-background-color: #f8f9fa;">
+    <VBox spacing="20" styleClass="page-background">
 
       <children>
         <!-- Page Title -->
-        <Label text="Dashboard" styleClass="section-title" style="-fx-font-size: 24px;" />
+        <Label text="Dashboard" styleClass="section-title,page-title" />
 
         <!-- Programs Table Section -->
         <VBox styleClass="content-card" spacing="15" VBox.vgrow="ALWAYS">
@@ -24,38 +24,38 @@
 
             <!-- Enhanced Filtering Section -->
             <VBox spacing="8">
-              <Label text="Filter Programs:" style="-fx-font-weight: bold;" />
+              <Label text="Filter Programs:" styleClass="filter-label-bold" />
               <FlowPane hgap="8" vgap="8" alignment="CENTER_LEFT">
                 <VBox spacing="4">
-                  <Label text="University:" style="-fx-font-size: 11px;" />
+                  <Label text="University:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterUniversity" promptText="University..." prefWidth="110" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Field of Study:" style="-fx-font-size: 11px;" />
+                  <Label text="Field of Study:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterFieldOfStudy" promptText="Field..." prefWidth="110" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Status:" style="-fx-font-size: 11px;" />
+                  <Label text="Status:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterStatus" promptText="Status..." prefWidth="90" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Focus Area:" style="-fx-font-size: 11px;" />
+                  <Label text="Focus Area:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterFocusArea" promptText="Focus..." prefWidth="90" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Tuition:" style="-fx-font-size: 11px;" />
+                  <Label text="Tuition:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterTuition" promptText="Tuition..." prefWidth="90" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Portal:" style="-fx-font-size: 11px;" />
+                  <Label text="Portal:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterPortal" promptText="Portal..." prefWidth="90" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Website:" style="-fx-font-size: 11px;" />
+                  <Label text="Website:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterWebsite" promptText="Website..." prefWidth="90" />
                 </VBox>
                 <VBox spacing="4" alignment="BOTTOM_LEFT">
-                  <Label text=" " style="-fx-font-size: 11px;" />
+                  <Label text=" " styleClass="filter-label-small" />
                   <HBox spacing="6">
                     <Button text="Filter" fx:id="btnFilter" onAction="#onFilter" prefWidth="80" />
                     <Button text="Clear" fx:id="btnClearFilter" onAction="#onClearFilter" styleClass="button-outline" prefWidth="60" />
@@ -69,21 +69,21 @@
           <!-- Programs Table -->
           <TableView fx:id="tblPrograms" VBox.vgrow="ALWAYS" onMouseClicked="#onRowSelect">
             <columns>
-              <TableColumn text="University Name" fx:id="colUniversityName" prefWidth="180" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Field of Study" fx:id="colFieldOfStudy" prefWidth="140" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Focus Area" fx:id="colFocusArea" prefWidth="130" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Deadline" fx:id="colDeadline" prefWidth="100" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Status" fx:id="colStatus" prefWidth="100" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Tuition" fx:id="colTuition" prefWidth="120" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Portal" fx:id="colPortal" prefWidth="150" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Website" fx:id="colWebsite" prefWidth="150" style="-fx-alignment: CENTER;" />
+              <TableColumn text="University Name" fx:id="colUniversityName" prefWidth="180" styleClass="table-column-centered" />
+              <TableColumn text="Field of Study" fx:id="colFieldOfStudy" prefWidth="140" styleClass="table-column-centered" />
+              <TableColumn text="Focus Area" fx:id="colFocusArea" prefWidth="130" styleClass="table-column-centered" />
+              <TableColumn text="Deadline" fx:id="colDeadline" prefWidth="100" styleClass="table-column-centered" />
+              <TableColumn text="Status" fx:id="colStatus" prefWidth="100" styleClass="table-column-centered" />
+              <TableColumn text="Tuition" fx:id="colTuition" prefWidth="120" styleClass="table-column-centered" />
+              <TableColumn text="Portal" fx:id="colPortal" prefWidth="150" styleClass="table-column-centered" />
+              <TableColumn text="Website" fx:id="colWebsite" prefWidth="150" styleClass="table-column-centered" />
             </columns>
             <placeholder>
-              <Label text="No programs found. Add your first program below!" style="-fx-text-fill: #9e9e9e; -fx-font-size: 14px;" />
+              <Label text="No programs found. Add your first program below!" styleClass="placeholder-text" />
             </placeholder>
           </TableView>
 
-          <Label fx:id="lblProgramCount" text="Total: 0 programs" style="-fx-text-fill: #757575;" />
+          <Label fx:id="lblProgramCount" text="Total: 0 programs" styleClass="count-label" />
 
           <!-- Add Program Button -->
           <HBox alignment="CENTER_LEFT" spacing="12">
@@ -97,7 +97,7 @@
           <HBox alignment="CENTER_LEFT" spacing="12">
             <Label text="Program Details" styleClass="section-title" />
             <Region HBox.hgrow="ALWAYS" />
-            <Label fx:id="lblFormMode" text="Select a program to view details" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2;" />
+            <Label fx:id="lblFormMode" text="Select a program to view details" styleClass="form-mode-label" />
           </HBox>
 
           <!-- Form Fields -->
@@ -131,9 +131,9 @@
             <Label text="Deadline:" styleClass="field-label" GridPane.rowIndex="5" GridPane.columnIndex="0" />
             <DatePicker fx:id="dpDeadline" promptText="Select date" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200" />
 
-            <!-- Row 6: Status (free text field) -->
+            <!-- Row 6: Status (dropdown) -->
             <Label text="Status:" styleClass="field-label" GridPane.rowIndex="6" GridPane.columnIndex="0" />
-            <TextField fx:id="txtStatus" promptText="e.g., Pending, Submitted, etc." GridPane.rowIndex="6" GridPane.columnIndex="1" />
+            <ComboBox fx:id="cmbStatus" promptText="Select status..." GridPane.rowIndex="6" GridPane.columnIndex="1" prefWidth="200" />
 
             <!-- Row 7: Tuition -->
             <Label text="Tuition Info:" styleClass="field-label" GridPane.rowIndex="7" GridPane.columnIndex="0" />
@@ -171,7 +171,7 @@
 
           <ListView fx:id="lstLinkedDocuments" prefHeight="150">
             <placeholder>
-              <Label text="No documents linked to this program yet." style="-fx-text-fill: #9e9e9e;" />
+              <Label text="No documents linked to this program yet." styleClass="placeholder-text-secondary" />
             </placeholder>
           </ListView>
 

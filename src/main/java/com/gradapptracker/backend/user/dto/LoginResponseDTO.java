@@ -1,5 +1,10 @@
 package com.gradapptracker.backend.user.dto;
 
+/**
+ * Response DTO for user login.
+ * <p>
+ * Contains JWT token for authentication and user profile information.
+ */
 public class LoginResponseDTO {
     private String token;
     private UserResponse user;
@@ -28,4 +33,3 @@ public class LoginResponseDTO {
         this.user = user;
     }
 }
-

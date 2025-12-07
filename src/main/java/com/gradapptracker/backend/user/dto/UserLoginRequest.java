@@ -3,6 +3,12 @@ package com.gradapptracker.backend.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Request DTO for user login.
+ * <p>
+ * Requires valid email and password. Credentials are validated against
+ * the database and a JWT token is returned on successful authentication.
+ */
 public class UserLoginRequest {
 
     @NotBlank
@@ -31,4 +37,3 @@ public class UserLoginRequest {
         this.password = password;
     }
 }
-

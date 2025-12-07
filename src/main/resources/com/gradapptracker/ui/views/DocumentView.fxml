@@ -8,13 +8,13 @@
   Full CRUD management for documents.
   Handles document upload, update, delete operations.
 -->
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.DocumentController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" style="-fx-background-color: #f8f9fa; -fx-background: #f8f9fa;">
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradapptracker.ui.controllers.DocumentController" stylesheets="@/styles/styles.css" fitToWidth="true" prefViewportHeight="700" styleClass="page-background">
   <content>
-    <VBox spacing="20" style="-fx-background-color: #f8f9fa;">
+    <VBox spacing="20" styleClass="page-background">
 
       <children>
         <!-- Page Title -->
-        <Label text="Documents Management" styleClass="section-title" style="-fx-font-size: 24px;" />
+        <Label text="Documents Management" styleClass="section-title,page-title" />
 
         <!-- Documents Table Section -->
         <VBox styleClass="content-card" spacing="15" VBox.vgrow="ALWAYS">
@@ -24,22 +24,22 @@
 
             <!-- Enhanced Filtering Section -->
             <VBox spacing="8">
-              <Label text="Filter Documents:" style="-fx-font-weight: bold;" />
+              <Label text="Filter Documents:" styleClass="filter-label-bold" />
               <HBox spacing="10" alignment="CENTER_LEFT">
                 <VBox spacing="4">
-                  <Label text="Document Type:" style="-fx-font-size: 11px;" />
+                  <Label text="Document Type:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterDocType" promptText="Type..." prefWidth="120" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="File Name:" style="-fx-font-size: 11px;" />
+                  <Label text="File Name:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterFileName" promptText="Name..." prefWidth="120" />
                 </VBox>
                 <VBox spacing="4">
-                  <Label text="Notes:" style="-fx-font-size: 11px;" />
+                  <Label text="Notes:" styleClass="filter-label-small" />
                   <TextField fx:id="txtFilterNotes" promptText="Notes..." prefWidth="120" />
                 </VBox>
                 <VBox spacing="4" alignment="BOTTOM_LEFT">
-                  <Label text=" " style="-fx-font-size: 11px;" />
+                  <Label text=" " styleClass="filter-label-small" />
                   <HBox spacing="6">
                     <Button text="Filter" fx:id="btnFilter" onAction="#onFilter" prefWidth="80" />
                     <Button text="Clear" fx:id="btnClearFilter" onAction="#onClearFilter" styleClass="button-outline" prefWidth="60" />
@@ -53,18 +53,18 @@
           <!-- Documents Table -->
           <TableView fx:id="tblDocuments" VBox.vgrow="ALWAYS" onMouseClicked="#onRowSelect">
             <columns>
-              <TableColumn text="Preview" fx:id="colPreview" prefWidth="80" sortable="false" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Document Type" fx:id="colDocType" prefWidth="150" style="-fx-alignment: CENTER;" />
-              <TableColumn text="File Name" fx:id="colFileName" prefWidth="250" style="-fx-alignment: CENTER;" />
-              <TableColumn text="Notes" fx:id="colNotes" prefWidth="300" style="-fx-alignment: CENTER;" />
-              <TableColumn text="File Path" fx:id="colFilePath" prefWidth="250" visible="false" style="-fx-alignment: CENTER;" />
+              <TableColumn text="Preview" fx:id="colPreview" prefWidth="80" sortable="false" styleClass="table-column-centered" />
+              <TableColumn text="Document Type" fx:id="colDocType" prefWidth="150" styleClass="table-column-centered" />
+              <TableColumn text="File Name" fx:id="colFileName" prefWidth="250" styleClass="table-column-centered" />
+              <TableColumn text="Notes" fx:id="colNotes" prefWidth="300" styleClass="table-column-centered" />
+              <TableColumn text="File Path" fx:id="colFilePath" prefWidth="250" visible="false" styleClass="table-column-centered" />
             </columns>
             <placeholder>
-              <Label text="No documents uploaded yet. Upload your first document below!" style="-fx-text-fill: #9e9e9e; -fx-font-size: 14px;" />
+              <Label text="No documents uploaded yet. Upload your first document below!" styleClass="placeholder-text" />
             </placeholder>
           </TableView>
 
-          <Label fx:id="lblDocumentCount" text="Total: 0 documents" style="-fx-text-fill: #757575;" />
+          <Label fx:id="lblDocumentCount" text="Total: 0 documents" styleClass="count-label" />
         </VBox>
 
         <!-- Document Upload/Edit Form -->
@@ -72,15 +72,15 @@
           <HBox alignment="CENTER_LEFT" spacing="12">
             <Label text="Document Details" styleClass="section-title" />
             <Region HBox.hgrow="ALWAYS" />
-            <Label fx:id="lblFormMode" text="Upload New Document" style="-fx-font-weight: bold; -fx-text-fill: #7b1fa2;" />
+            <Label fx:id="lblFormMode" text="Upload New Document" styleClass="form-mode-label" />
           </HBox>
 
           <!-- Info Box -->
           <HBox styleClass="alert-info" spacing="10" alignment="CENTER_LEFT">
-            <Label text="ℹ️" style="-fx-font-size: 18px;" />
+            <Label text="ℹ️" styleClass="info-icon" />
             <VBox spacing="4">
-              <Label text="Document Type is free text - enter any type you need." style="-fx-font-weight: bold; -fx-text-fill: #1976d2;" />
-              <Label text="Examples: Transcript, CV/Resume, Statement of Purpose, Recommendation Letter, Certificate, Test Score, ID Document, Other" wrapText="true" style="-fx-text-fill: #424242; -fx-font-size: 12px;" />
+              <Label text="Document Type is free text - enter any type you need." styleClass="info-text-bold-blue" />
+              <Label text="Examples: Transcript, CV/Resume, Statement of Purpose, Recommendation Letter, Certificate, Test Score, ID Document, Other" wrapText="true" styleClass="info-text-small" />
             </VBox>
           </HBox>
 
@@ -128,11 +128,11 @@
 
           <ListView fx:id="lstProgramsUsingDoc" prefHeight="120">
             <placeholder>
-              <Label text="This document is not linked to any programs yet." style="-fx-text-fill: #9e9e9e;" />
+              <Label text="This document is not linked to any programs yet." styleClass="placeholder-text-secondary" />
             </placeholder>
           </ListView>
 
-          <Label text="Tip: Go to Programs page to link this document to applications." style="-fx-text-fill: #757575; -fx-font-size: 12px; -fx-font-style: italic;" />
+          <Label text="Tip: Go to Programs page to link this document to applications." styleClass="tip-label" />
         </VBox>
 
       </children>

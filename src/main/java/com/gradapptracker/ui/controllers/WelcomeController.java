@@ -1,24 +1,40 @@
 package com.gradapptracker.ui.controllers;
 
 import com.gradapptracker.ui.services.UserServiceFx;
+import com.gradapptracker.ui.services.ServiceLocator;
 import com.gradapptracker.ui.services.AuthResult;
 import com.gradapptracker.ui.utils.AlertUtils;
 import com.gradapptracker.ui.utils.UserSession;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+/**
+ * Controller for the welcome/authentication view.
+ * <p>
+ * Handles user login and registration through a tabbed interface.
+ * Successful authentication stores JWT token in UserSession and navigates
+ * to the main programs dashboard.
+ */
 public class WelcomeController {
 
-    private final UserServiceFx userService = new UserServiceFx();
+    private final UserServiceFx userService = ServiceLocator.getInstance().getUserService();
 
-    @FXML private TabPane authTabPane;
-    @FXML private Tab loginTab;
-    @FXML private Tab registerTab;
-    @FXML private TextField txtLoginEmail;
-    @FXML private PasswordField txtLoginPassword;
-    @FXML private TextField txtRegisterName;
-    @FXML private TextField txtRegisterEmail;
-    @FXML private PasswordField txtRegisterPassword;
+    @FXML
+    private TabPane authTabPane;
+    @FXML
+    private Tab loginTab;
+    @FXML
+    private Tab registerTab;
+    @FXML
+    private TextField txtLoginEmail;
+    @FXML
+    private PasswordField txtLoginPassword;
+    @FXML
+    private TextField txtRegisterName;
+    @FXML
+    private TextField txtRegisterEmail;
+    @FXML
+    private PasswordField txtRegisterPassword;
 
     @FXML
     public void initialize() {
@@ -85,7 +101,9 @@ public class WelcomeController {
     }
 
     private void setupEnterKeyHandlers() {
-        if (txtLoginPassword != null) txtLoginPassword.setOnAction(e -> onLogin());
-        if (txtRegisterPassword != null) txtRegisterPassword.setOnAction(e -> onRegister());
+        if (txtLoginPassword != null)
+            txtLoginPassword.setOnAction(e -> onLogin());
+        if (txtRegisterPassword != null)
+            txtRegisterPassword.setOnAction(e -> onRegister());
     }
 }

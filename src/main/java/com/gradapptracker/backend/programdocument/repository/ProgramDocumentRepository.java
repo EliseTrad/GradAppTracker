@@ -7,6 +7,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Spring Data JPA repository for ProgramDocument junction entity.
+ * <p>
+ * Manages the many-to-many relationship between programs and documents.
+ * Provides methods to find links by program, check for document usage,
+ * and prevent duplicate associations.
+ */
 @Repository
 public interface ProgramDocumentRepository extends JpaRepository<ProgramDocument, Integer> {
 
@@ -20,4 +27,3 @@ public interface ProgramDocumentRepository extends JpaRepository<ProgramDocument
     boolean existsByDocumentDocumentId(Integer documentId);
 
 }
-

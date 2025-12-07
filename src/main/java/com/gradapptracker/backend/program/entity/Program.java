@@ -48,8 +48,9 @@ public class Program {
     @Column
     private LocalDate deadline;
 
-    @Column
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ApplicationStatus status;
 
     @Column
     private String tuition;

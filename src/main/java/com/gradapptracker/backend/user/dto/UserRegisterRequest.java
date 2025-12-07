@@ -3,6 +3,12 @@ package com.gradapptracker.backend.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Request DTO for user registration.
+ * <p>
+ * All fields are validated: name and password must not be blank,
+ * email must be valid and unique in the database.
+ */
 public class UserRegisterRequest {
 
     @NotBlank
@@ -42,4 +48,3 @@ public class UserRegisterRequest {
         this.password = password;
     }
 }
-

@@ -9,8 +9,8 @@ import com.gradapptracker.backend.exception.NotFoundException;
 import com.gradapptracker.backend.programdocument.dto.ProgramDocumentDTO;
 import com.gradapptracker.backend.programdocument.entity.ProgramDocument;
 import com.gradapptracker.backend.programdocument.repository.ProgramDocumentRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,6 +90,7 @@ public class ProgramDocumentService {
      * @return list of ProgramDocumentDTO; empty list when no links exist
      * @throws NotFoundException when the program does not exist
      */
+    @Transactional(readOnly = true)
     public List<ProgramDocumentDTO> getDocumentsByProgram(Integer userId, Integer programId) {
         if (!programRepository.existsById(programId)) {
             throw new NotFoundException("Program not found with id: " + programId);
@@ -147,4 +148,3 @@ public class ProgramDocumentService {
     }
 
 }
-

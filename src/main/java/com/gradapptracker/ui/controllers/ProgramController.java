@@ -9,6 +9,7 @@ import com.gradapptracker.backend.programdocument.dto.ProgramDocumentDTO;
 import com.gradapptracker.ui.services.ProgramServiceFx;
 import com.gradapptracker.ui.services.DocumentServiceFx;
 import com.gradapptracker.ui.services.ProgramDocumentServiceFx;
+import com.gradapptracker.ui.services.ServiceLocator;
 import com.gradapptracker.ui.utils.AlertUtils;
 import com.gradapptracker.ui.utils.AsyncUtils;
 
@@ -42,9 +43,10 @@ import java.util.Map;
  */
 public class ProgramController {
 
-    private final ProgramServiceFx programService = new ProgramServiceFx();
-    private final DocumentServiceFx documentService = new DocumentServiceFx();
-    private final ProgramDocumentServiceFx programDocumentService = new ProgramDocumentServiceFx();
+    private final ProgramServiceFx programService = ServiceLocator.getInstance().getProgramService();
+    private final DocumentServiceFx documentService = ServiceLocator.getInstance().getDocumentService();
+    private final ProgramDocumentServiceFx programDocumentService = ServiceLocator.getInstance()
+            .getProgramDocumentService();
 
     private final ObservableList<ProgramDTO> programs = FXCollections.observableArrayList();
     private final ObservableList<DocumentResponseDTO> availableDocuments = FXCollections.observableArrayList();
@@ -103,7 +105,7 @@ public class ProgramController {
     private DatePicker dpDeadline;
 
     @FXML
-    private TextField txtStatus;
+    private ComboBox<String> cmbStatus;
 
     @FXML
     private TextArea txtRequirements, txtNotes;
@@ -152,7 +154,9 @@ public class ProgramController {
         colPortal.setCellValueFactory(c -> new SimpleStringProperty(nullSafe(c.getValue().getPortal())));
         colWebsite.setCellValueFactory(c -> new SimpleStringProperty(nullSafe(c.getValue().getWebsite())));
 
-        // Status is free text - no predefined options needed
+        // Initialize status dropdown with predefined values
+        cmbStatus.setItems(FXCollections.observableArrayList(
+                "Accepted", "Applied", "In Progress", "Rejected", "Other"));
 
         // Program details and linked docs sections are now always visible
         // They show "Select a program" message when no program is selected
@@ -348,7 +352,7 @@ public class ProgramController {
         addFilterIfNotEmpty(filters, "focusArea", txtFocusArea.getText());
         addFilterIfNotEmpty(filters, "portal", txtPortal.getText());
         addFilterIfNotEmpty(filters, "website", txtWebsite.getText());
-        addFilterIfNotEmpty(filters, "status", txtStatus.getText());
+        addFilterIfNotEmpty(filters, "status", cmbStatus.getValue());
         addFilterIfNotEmpty(filters, "tuition", txtTuition.getText());
         addFilterIfNotEmpty(filters, "requirements", txtRequirements.getText());
         addFilterIfNotEmpty(filters, "notes", txtNotes.getText());
@@ -397,7 +401,7 @@ public class ProgramController {
         dto.setPortal(emptyToNull(txtPortal.getText()));
         dto.setWebsite(emptyToNull(txtWebsite.getText()));
         dto.setDeadline(dpDeadline.getValue());
-        dto.setStatus(emptyToNull(txtStatus.getText()));
+        dto.setStatus(cmbStatus.getValue());
         dto.setTuition(emptyToNull(txtTuition.getText()));
         dto.setRequirements(emptyToNull(txtRequirements.getText()));
         dto.setNotes(emptyToNull(txtNotes.getText()));
@@ -460,7 +464,7 @@ public class ProgramController {
         dto.setPortal(emptyToNull(txtPortal.getText()));
         dto.setWebsite(emptyToNull(txtWebsite.getText()));
         dto.setDeadline(dpDeadline.getValue());
-        dto.setStatus(emptyToNull(txtStatus.getText()));
+        dto.setStatus(cmbStatus.getValue());
         dto.setTuition(emptyToNull(txtTuition.getText()));
         dto.setRequirements(emptyToNull(txtRequirements.getText()));
         dto.setNotes(emptyToNull(txtNotes.getText()));
@@ -535,7 +539,7 @@ public class ProgramController {
         txtPortal.setText(nullSafe(sel.getPortal()));
         txtWebsite.setText(nullSafe(sel.getWebsite()));
         dpDeadline.setValue(sel.getDeadline());
-        txtStatus.setText(nullSafe(sel.getStatus()));
+        cmbStatus.setValue(sel.getStatus());
         txtTuition.setText(nullSafe(sel.getTuition()));
         txtRequirements.setText(nullSafe(sel.getRequirements()));
         txtNotes.setText(nullSafe(sel.getNotes()));
@@ -561,7 +565,7 @@ public class ProgramController {
         txtPortal.setEditable(editable);
         txtWebsite.setEditable(editable);
         dpDeadline.setDisable(!editable);
-        txtStatus.setEditable(editable);
+        cmbStatus.setDisable(!editable);
         txtTuition.setEditable(editable);
         txtRequirements.setEditable(editable);
         txtNotes.setEditable(editable);
@@ -805,8 +809,10 @@ public class ProgramController {
         txtWebsiteDialog.setPromptText("https://...");
         DatePicker dpDeadlineDialog = new DatePicker();
         dpDeadlineDialog.setPromptText("Select date");
-        TextField txtStatusDialog = new TextField();
-        txtStatusDialog.setPromptText("e.g., Pending, Submitted, etc.");
+        ComboBox<String> cmbStatusDialog = new ComboBox<>();
+        cmbStatusDialog
+                .setItems(FXCollections.observableArrayList("Accepted", "Applied", "In Progress", "Rejected", "Other"));
+        cmbStatusDialog.setPromptText("Select status...");
         TextField txtTuitionDialog = new TextField();
         txtTuitionDialog.setPromptText("e.g., Full scholarship, $50,000/year");
         TextArea txtRequirementsDialog = new TextArea();
@@ -832,7 +838,7 @@ public class ProgramController {
         form.add(new Label("Deadline:"), 0, 5);
         form.add(dpDeadlineDialog, 1, 5);
         form.add(new Label("Status:"), 0, 6);
-        form.add(txtStatusDialog, 1, 6);
+        form.add(cmbStatusDialog, 1, 6);
         form.add(new Label("Tuition Info:"), 0, 7);
         form.add(txtTuitionDialog, 1, 7);
         form.add(new Label("Requirements:"), 0, 8);
@@ -854,7 +860,7 @@ public class ProgramController {
                 dto.setPortal(emptyToNull(txtPortalDialog.getText()));
                 dto.setWebsite(emptyToNull(txtWebsiteDialog.getText()));
                 dto.setDeadline(dpDeadlineDialog.getValue());
-                dto.setStatus(emptyToNull(txtStatusDialog.getText()));
+                dto.setStatus(emptyToNull(cmbStatusDialog.getValue()));
                 dto.setTuition(emptyToNull(txtTuitionDialog.getText()));
                 dto.setRequirements(emptyToNull(txtRequirementsDialog.getText()));
                 dto.setNotes(emptyToNull(txtNotesDialog.getText()));
@@ -888,7 +894,7 @@ public class ProgramController {
         txtPortal.clear();
         txtWebsite.clear();
         dpDeadline.setValue(null);
-        txtStatus.clear();
+        cmbStatus.setValue(null);
         txtTuition.clear();
         txtRequirements.clear();
         txtNotes.clear();

@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Request DTO for updating an existing graduate program.
+ * <p>
+ * University name is required. All other fields are optional.
+ * Only provided fields will be updated in the database.
+ * User must own the program to update it.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -12,6 +12,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Spring Security configuration for the application.
+ * <p>
+ * Configures:
+ * <ul>
+ * <li>JWT-based stateless authentication</li>
+ * <li>Public endpoints (register, login) vs protected API routes</li>
+ * <li>Password encryption with BCrypt</li>
+ * <li>Custom JWT authentication filter</li>
+ * </ul>
+ * <p>
+ * All /api/** endpoints require valid JWT token except /api/users/register
+ * and /api/users/login.
+ */
 @Configuration
 public class SecurityConfig {
 

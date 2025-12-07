@@ -21,7 +21,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * JPA entity for the program_documents join table.
+ * JPA entity for the program_documents junction table.
+ * <p>
+ * Represents the many-to-many relationship between programs and documents.
+ * One program can have multiple documents, and one document can be linked
+ * to multiple programs. The unique constraint ensures a document can only
+ * be linked to a specific program once.
  */
 @Entity
 @Table(name = "program_documents", uniqueConstraints = {
@@ -53,4 +58,3 @@ public class ProgramDocument {
     private String usageNotes;
 
 }
-

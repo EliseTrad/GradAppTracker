@@ -16,6 +16,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Spring Security filter for JWT token authentication.
+ * <p>
+ * Intercepts incoming HTTP requests, extracts JWT token from Authorization
+ * header, validates it, and sets the Spring Security authentication context.
+ * <p>
+ * This filter runs once per request before Spring Security's authentication
+ * checks, enabling stateless JWT-based authentication for protected endpoints.
+ */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -60,4 +69,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-

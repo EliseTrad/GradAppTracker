@@ -7,6 +7,13 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JPA entity representing a user account.
+ * <p>
+ * Maps to the "users" table in the database. Each user can have multiple
+ * graduate programs and documents. Password is stored encrypted using BCrypt.
+ * Email must be unique across all users.
+ */
 @Entity
 @Table(name = "users")
 public class User {

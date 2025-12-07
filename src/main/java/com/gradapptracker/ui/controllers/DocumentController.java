@@ -3,6 +3,7 @@ package com.gradapptracker.ui.controllers;
 import com.gradapptracker.backend.document.dto.DocumentResponseDTO;
 import com.gradapptracker.backend.document.dto.DocumentUpdateDTO;
 import com.gradapptracker.ui.services.DocumentServiceFx;
+import com.gradapptracker.ui.services.ServiceLocator;
 import com.gradapptracker.ui.utils.AlertUtils;
 import com.gradapptracker.ui.utils.AsyncUtils;
 import com.gradapptracker.ui.utils.UserSession;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public class DocumentController {
 
-    private final DocumentServiceFx documentService = new DocumentServiceFx();
+    private final DocumentServiceFx documentService = ServiceLocator.getInstance().getDocumentService();
 
     private final ObservableList<DocumentResponseDTO> documents = FXCollections.observableArrayList();
 

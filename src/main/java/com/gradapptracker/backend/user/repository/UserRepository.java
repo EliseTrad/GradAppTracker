@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.lang.NonNull;
 
+/**
+ * Spring Data JPA repository for User entity.
+ * <p>
+ * Provides CRUD operations and custom query methods for user management
+ * including email lookup, name search, and existence checks.
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
@@ -24,4 +30,3 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(String email);
 
 }
-

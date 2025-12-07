@@ -1,5 +1,12 @@
 package com.gradapptracker.backend.document.dto;
 
+/**
+ * Response DTO for document information.
+ * <p>
+ * Contains document metadata returned by API endpoints.
+ * File path is included but should be treated as internal;
+ * use the download endpoint to retrieve actual file contents.
+ */
 public class DocumentResponseDTO {
 
     private Integer documentId;
@@ -65,4 +72,3 @@ public class DocumentResponseDTO {
         this.notes = notes;
     }
 }
-

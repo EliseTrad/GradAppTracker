@@ -232,7 +232,7 @@ public class Dashboard3DController {
             bar.setMaterial(material);
 
             // Store original color for hover effects
-            bar.setUserData(new BarData(status, count, statusColors.get(status)));
+            bar.setUserData(new BarData(statusColors.get(status)));
 
             // Add animations
             addRotationAnimation(bar);
@@ -360,13 +360,9 @@ public class Dashboard3DController {
      * Helper class to store bar metadata.
      */
     private static class BarData {
-        String status;
-        int count;
         Color originalColor;
 
-        BarData(String status, int count, Color color) {
-            this.status = status;
-            this.count = count;
+        BarData(Color color) {
             this.originalColor = color;
         }
     }

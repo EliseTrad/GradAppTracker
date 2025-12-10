@@ -38,6 +38,12 @@ public class ProgramController {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Extract the authenticated user ID from the JWT token in the request header.
+     * 
+     * @param req the HTTP request containing the Authorization header
+     * @return the user ID extracted from the JWT token, or null if extraction fails
+     */
     private Integer extractUserId(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         String token = (auth != null && auth.startsWith("Bearer ")) ? auth.substring(7) : auth;
@@ -46,6 +52,14 @@ public class ProgramController {
 
     /**
      * Create a program for the authenticated user.
+     * 
+     * @param req the HTTP request containing the Authorization header with JWT
+     *            token
+     * @param dto the program creation payload validated by @Valid annotation
+     * @return ResponseEntity with HTTP 201 Created and the created ProgramDTO
+     * @throws UnauthorizedException if user is not authenticated
+     * @throws NotFoundException     if user doesn't exist
+     * @throws ValidationException   if required fields are missing or invalid
      */
     @PostMapping
     public ResponseEntity<ProgramDTO> createProgram(HttpServletRequest req, @RequestBody @Valid ProgramCreateDTO dto) {
@@ -56,6 +70,10 @@ public class ProgramController {
 
     /**
      * Get all programs for the authenticated user.
+     * 
+     * @param req the HTTP request containing the Authorization header
+     * @return ResponseEntity containing a list of all ProgramDTOs owned by the user
+     * @throws UnauthorizedException if user is not authenticated
      */
     @GetMapping
     public ResponseEntity<List<ProgramDTO>> getAllPrograms(HttpServletRequest req) {
@@ -75,8 +93,15 @@ public class ProgramController {
     }
 
     /**
-     * Filter programs for the authenticated user. Query parameters are forwarded
-     * directly to the service as filter keys.
+     * Filter programs for the authenticated user.
+     * Query parameters are forwarded directly to the service as filter keys.
+     * Supports filtering by: universityName, fieldOfStudy, focusArea, status,
+     * tuition, portal, website, deadline (range or exact).
+     * 
+     * @param req       the HTTP request containing the Authorization header
+     * @param allParams map of all query parameters to use as filters
+     * @return ResponseEntity containing filtered list of ProgramDTOs
+     * @throws UnauthorizedException if user is not authenticated
      */
     @GetMapping("/filter")
     public ResponseEntity<List<ProgramDTO>> filterPrograms(HttpServletRequest req,
@@ -92,6 +117,15 @@ public class ProgramController {
 
     /**
      * Update a program for the authenticated user.
+     * Supports partial updates - only provided fields will be updated.
+     * 
+     * @param req       the HTTP request containing the Authorization header
+     * @param programId the ID of the program to update
+     * @param dto       the update payload with fields to modify
+     * @return ResponseEntity containing the updated ProgramDTO
+     * @throws UnauthorizedException if user is not authenticated
+     * @throws ForbiddenException    if user doesn't own the program
+     * @throws NotFoundException     if program doesn't exist
      */
     @PutMapping("/{programId}")
     public ResponseEntity<ProgramDTO> updateProgram(HttpServletRequest req, @PathVariable Integer programId,
@@ -103,6 +137,13 @@ public class ProgramController {
 
     /**
      * Delete a program for the authenticated user.
+     * 
+     * @param req       the HTTP request containing the Authorization header
+     * @param programId the ID of the program to delete
+     * @return ResponseEntity with HTTP 204 No Content on success
+     * @throws UnauthorizedException if user is not authenticated
+     * @throws ForbiddenException    if user doesn't own the program
+     * @throws NotFoundException     if program doesn't exist
      */
     @DeleteMapping("/{programId}")
     public ResponseEntity<Void> deleteProgram(HttpServletRequest req, @PathVariable Integer programId) {

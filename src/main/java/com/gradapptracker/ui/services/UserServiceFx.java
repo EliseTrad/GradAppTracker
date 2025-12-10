@@ -12,6 +12,13 @@ public class UserServiceFx extends ApiClient {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Authenticate a user with email and password.
+     * 
+     * @param email    the user's email address
+     * @param password the user's plain-text password
+     * @return AuthResult containing success status, JWT token, userId, and message
+     */
     // ----------------- LOGIN -----------------
     public AuthResult login(String email, String password) {
         try {
@@ -35,6 +42,14 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Register a new user account and automatically log them in.
+     * 
+     * @param fullName the user's full name
+     * @param email    the user's email address
+     * @param password the user's password
+     * @return AuthResult containing success status, JWT token, userId, and message
+     */
     // ----------------- REGISTER -----------------
     public AuthResult register(String fullName, String email, String password) {
         try {
@@ -56,6 +71,13 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Retrieve user information by ID.
+     * 
+     * @param id the user ID to retrieve
+     * @return UserResponse containing the user's information
+     * @throws RuntimeException if the request fails or user doesn't exist
+     */
     // ----------------- GET USER -----------------
     public UserResponse getUser(Integer id) {
         try {
@@ -71,6 +93,14 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Update user information (name and/or email).
+     * 
+     * @param id  the user ID to update
+     * @param dto the update payload containing fields to modify
+     * @return UserResponse containing the updated user information
+     * @throws RuntimeException if the update fails
+     */
     // ----------------- UPDATE USER -----------------
     public UserResponse updateUser(Integer id, UserUpdateRequest dto) {
         try {
@@ -87,6 +117,14 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Change the current user's password.
+     * Requires the user to be logged in (valid UserSession).
+     * 
+     * @param currentPassword the user's current password for verification
+     * @param newPassword     the new password to set
+     * @throws RuntimeException if user is not logged in or password change fails
+     */
     // ----------------- CHANGE PASSWORD -----------------
     public void changePassword(String currentPassword, String newPassword) {
         try {
@@ -107,6 +145,12 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Delete a user account.
+     * 
+     * @param id the user ID to delete
+     * @throws RuntimeException if the deletion fails
+     */
     // ----------------- DELETE USER -----------------
     public void deleteUser(Integer id) {
         try {
@@ -119,11 +163,26 @@ public class UserServiceFx extends ApiClient {
         }
     }
 
+    /**
+     * Escape special characters in strings for JSON formatting.
+     * 
+     * @param s the string to escape
+     * @return escaped string safe for JSON
+     */
     // ----------------- HELPERS -----------------
     private static String escape(String s) {
         return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
+    /**
+     * Extract user-friendly error message from backend JSON response.
+     * Attempts to parse JSON error format from backend and extract the message
+     * field
+     * or validation errors array.
+     * 
+     * @param fullMessage the raw error message or JSON from backend
+     * @return user-friendly error message string
+     */
     private static String extractBackendErrorMessage(String fullMessage) {
         if (fullMessage == null || fullMessage.isBlank()) {
             return "An error occurred";

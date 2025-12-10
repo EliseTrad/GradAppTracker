@@ -33,6 +33,12 @@ public class ProgramDocumentController {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Extract the authenticated user ID from the JWT token in the request header.
+     * 
+     * @param req the HTTP request containing the Authorization header
+     * @return the user ID extracted from the JWT token, or null if extraction fails
+     */
     private Integer extractUserId(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         String token = (auth != null && auth.startsWith("Bearer ")) ? auth.substring(7) : auth;
@@ -40,8 +46,17 @@ public class ProgramDocumentController {
     }
 
     /**
-     * Link a document to a program. Accepts a body with documentId and optional
-     * usageNotes.
+     * Link a document to a program.
+     * Accepts a body with documentId and optional usageNotes.
+     * 
+     * @param req       the HTTP request containing the Authorization header
+     * @param programId the ID of the program to link the document to
+     * @param body      the request body containing documentId and optional
+     *                  usageNotes
+     * @return ResponseEntity with HTTP 201 Created and the created
+     *         ProgramDocumentDTO
+     * @throws UnauthorizedException if user doesn't own the program or document
+     * @throws NotFoundException     if program or document doesn't exist
      */
     @PostMapping("/programs/{programId}/documents")
     public ResponseEntity<ProgramDocumentDTO> linkDocument(HttpServletRequest req,
@@ -55,6 +70,12 @@ public class ProgramDocumentController {
 
     /**
      * Get all documents linked to a program.
+     * 
+     * @param req       the HTTP request containing the Authorization header
+     * @param programId the ID of the program to retrieve linked documents for
+     * @return ResponseEntity containing a list of ProgramDocumentDTOs
+     * @throws UnauthorizedException if user doesn't own the program
+     * @throws NotFoundException     if program doesn't exist
      */
     @GetMapping("/programs/{programId}/documents")
     public ResponseEntity<List<ProgramDocumentDTO>> getDocumentsByProgram(HttpServletRequest req,
@@ -66,6 +87,12 @@ public class ProgramDocumentController {
 
     /**
      * Delete a program-document link.
+     * 
+     * @param req          the HTTP request containing the Authorization header
+     * @param programDocId the ID of the program-document link to delete
+     * @return ResponseEntity with HTTP 204 No Content on success
+     * @throws UnauthorizedException if user doesn't own the associated program
+     * @throws NotFoundException     if the link doesn't exist
      */
     @DeleteMapping("/program-docs/{programDocId}")
     public ResponseEntity<Void> deleteLink(HttpServletRequest req, @PathVariable Integer programDocId) {
@@ -75,4 +102,3 @@ public class ProgramDocumentController {
     }
 
 }
-

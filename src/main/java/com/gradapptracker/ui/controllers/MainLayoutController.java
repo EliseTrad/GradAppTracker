@@ -150,6 +150,10 @@ public class MainLayoutController {
 
     /**
      * Set active navigation button styling.
+     * Removes the "nav-button-active" style class from the previously active button
+     * and applies it to the newly selected button for visual feedback.
+     * 
+     * @param button the navigation button to mark as active
      */
     private void setActiveNavButton(Button button) {
         // Remove active class from previous button
@@ -165,12 +169,22 @@ public class MainLayoutController {
 
     // ==================== Navigation Actions ====================
 
+    /**
+     * Navigate to the Programs dashboard view.
+     * Sets the Programs view as the active content and highlights the dashboard
+     * navigation button.
+     */
     @FXML
     private void onNavigateDashboard() {
         setContent("/com/gradapptracker/ui/views/ProgramView.fxml");
         setActiveNavButton(btnNavDashboard);
     }
 
+    /**
+     * Navigate to the 3D Analytics dashboard view.
+     * Requires authentication. Shows error dialog if user is not logged in.
+     * Sets the 3D visualization as the active content.
+     */
     @FXML
     private void onNavigate3DDashboard() {
         // Check authentication before navigating to 3D dashboard
@@ -182,6 +196,11 @@ public class MainLayoutController {
         setActiveNavButton(btnNav3DDashboard);
     }
 
+    /**
+     * Navigate to the Documents management view.
+     * Requires authentication. Shows error dialog if user is not logged in.
+     * Sets the Documents view as the active content.
+     */
     @FXML
     private void onNavigateDocuments() {
         // Check authentication before navigating to documents
@@ -193,12 +212,23 @@ public class MainLayoutController {
         setActiveNavButton(btnNavDocuments);
     }
 
+    /**
+     * Navigate to the Profile management view.
+     * Sets the Profile view as the active content and highlights the profile
+     * navigation button.
+     */
     @FXML
     private void onNavigateProfile() {
         setContent("/com/gradapptracker/ui/views/ProfileView.fxml");
         setActiveNavButton(btnNavProfile);
     }
 
+    /**
+     * Handle user logout action.
+     * Prompts for confirmation, then clears the user session, hides navigation
+     * panel,
+     * and returns to the welcome/login screen.
+     */
     @FXML
     public void onLogout() {
         boolean confirmed = AlertUtils.showConfirmation(

@@ -33,6 +33,14 @@ public class DocumentController {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Extract and validate the authenticated user ID from the JWT token.
+     * 
+     * @param req the HTTP request containing the Authorization header
+     * @return the authenticated user ID
+     * @throws UnauthorizedException if Authorization header is missing, invalid, or
+     *                               token is invalid
+     */
     private Integer getAuthenticatedUserId(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         if (auth == null || !auth.startsWith("Bearer ")) {
@@ -48,6 +56,18 @@ public class DocumentController {
 
     /**
      * Upload a document for a given user.
+     * 
+     * @param req     the HTTP request containing the Authorization header
+     * @param userId  the ID of the user who will own the document
+     * @param file    the multipart file to upload (PDF, DOCX, TXT, etc.)
+     * @param docType the type of document (e.g., "Resume", "Transcript", "Letter of
+     *                Recommendation")
+     * @param notes   optional notes about the document
+     * @return DocumentResponseDTO containing the uploaded document's metadata
+     * @throws UnauthorizedException if the authenticated user doesn't match the
+     *                               userId
+     * @throws ValidationException   if file is invalid (wrong type, too large,
+     *                               etc.)
      */
     @PostMapping(value = "/api/users/{userId}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DocumentResponseDTO uploadDocument(HttpServletRequest req,
@@ -60,8 +80,17 @@ public class DocumentController {
     }
 
     /**
-     * Replace the file for an existing document. Accepts a multipart file and
-     * replaces the on-disk file and updates the DB record.
+     * Replace the file for an existing document.
+     * Accepts a multipart file and replaces the on-disk file and updates the DB
+     * record.
+     * 
+     * @param req        the HTTP request containing the Authorization header
+     * @param documentId the ID of the document whose file should be replaced
+     * @param file       the new multipart file to replace the existing one
+     * @return DocumentResponseDTO containing the updated document's metadata
+     * @throws UnauthorizedException if user is not the document owner
+     * @throws NotFoundException     if document doesn't exist
+     * @throws ValidationException   if file is invalid
      */
     @PostMapping(value = "/api/documents/{documentId}/replace", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DocumentResponseDTO replaceFile(HttpServletRequest req,
@@ -73,6 +102,12 @@ public class DocumentController {
 
     /**
      * List all documents for a user.
+     * 
+     * @param req    the HTTP request containing the Authorization header
+     * @param userId the ID of the user whose documents to retrieve
+     * @return List of DocumentResponseDTO containing all documents owned by the
+     *         user
+     * @throws UnauthorizedException if authenticated user doesn't match userId
      */
     @GetMapping("/api/users/{userId}/documents")
     public List<DocumentResponseDTO> listDocuments(HttpServletRequest req, @PathVariable Integer userId) {
@@ -82,6 +117,12 @@ public class DocumentController {
 
     /**
      * Search documents by type for a user.
+     * 
+     * @param req     the HTTP request containing the Authorization header
+     * @param userId  the ID of the user whose documents to search
+     * @param docType the document type to filter by (e.g., "Resume", "Transcript")
+     * @return List of DocumentResponseDTO matching the specified type
+     * @throws UnauthorizedException if authenticated user doesn't match userId
      */
     @GetMapping("/api/users/{userId}/documents/search")
     public List<DocumentResponseDTO> searchByType(HttpServletRequest req,
@@ -93,6 +134,12 @@ public class DocumentController {
 
     /**
      * Get a single document by id.
+     * 
+     * @param req        the HTTP request containing the Authorization header
+     * @param documentId the ID of the document to retrieve
+     * @return DocumentResponseDTO containing the document's metadata
+     * @throws UnauthorizedException if user is not the document owner
+     * @throws NotFoundException     if document doesn't exist
      */
     @GetMapping("/api/documents/{documentId}")
     public DocumentResponseDTO getById(HttpServletRequest req, @PathVariable Integer documentId) {
@@ -146,4 +193,3 @@ public class DocumentController {
     }
 
 }
-

@@ -38,6 +38,12 @@ public class UserController {
 		this.jwtUtils = jwtUtils;
 	}
 
+	/**
+	 * Extract the authenticated user ID from the JWT token in the request header.
+	 * 
+	 * @param req the HTTP request containing the Authorization header
+	 * @return the user ID extracted from the JWT token, or null if extraction fails
+	 */
 	private Integer extractUserId(HttpServletRequest req) {
 		String auth = req.getHeader("Authorization");
 		String token = (auth != null && auth.startsWith("Bearer ")) ? auth.substring(7) : auth;
@@ -47,8 +53,10 @@ public class UserController {
 	/**
 	 * Register a new user.
 	 * 
-	 * @param req request body with name/email/password
-	 * @return created user DTO
+	 * @param req request body with name, email, and password
+	 * @return UserResponse DTO containing the created user's information
+	 * @throws EmailAlreadyExistsException if email is already registered
+	 * @throws ValidationException         if required fields are missing or invalid
 	 */
 	@PostMapping("/register")
 	public UserResponse register(@RequestBody @Valid UserRegisterRequest req) {
@@ -56,10 +64,12 @@ public class UserController {
 	}
 
 	/**
-	 * Authenticate user and return token + user info.
+	 * Authenticate user and return token plus user info.
 	 * 
 	 * @param req login request with email and password
-	 * @return login response containing JWT and user DTO
+	 * @return LoginResponseDTO containing JWT token and user information
+	 * @throws UnauthorizedException if credentials are invalid (user not found or
+	 *                               password mismatch)
 	 */
 	@PostMapping("/login")
 	public LoginResponseDTO login(@RequestBody @Valid UserLoginRequest req) {
@@ -68,6 +78,10 @@ public class UserController {
 
 	/**
 	 * Get a user by id.
+	 * 
+	 * @param id the user ID to retrieve
+	 * @return UserResponse DTO containing the user's information
+	 * @throws NotFoundException if user doesn't exist
 	 */
 	@GetMapping("/{id}")
 	public UserResponse getById(@PathVariable Integer id) {
@@ -75,7 +89,10 @@ public class UserController {
 	}
 
 	/**
-	 * Search users by name fragment.
+	 * Search users by name fragment (case-insensitive contains search).
+	 * 
+	 * @param q the query string to search for in user names
+	 * @return List of UserResponse DTOs matching the search criteria
 	 */
 	@GetMapping("/search")
 	public List<UserResponse> searchByName(@RequestParam("q") @NotBlank String q) {
@@ -83,7 +100,11 @@ public class UserController {
 	}
 
 	/**
-	 * Suggest users by email fragment.
+	 * Suggest users by email fragment (smart search supporting partial email
+	 * matching).
+	 * 
+	 * @param q the query string to search for in email addresses
+	 * @return List of UserResponse DTOs with matching email addresses
 	 */
 	@GetMapping("/suggest/email")
 	public List<UserResponse> suggestByEmail(@RequestParam("q") @NotBlank String q) {
@@ -91,7 +112,13 @@ public class UserController {
 	}
 
 	/**
-	 * Update a user.
+	 * Update a user's information (name and/or email).
+	 * 
+	 * @param id  the user ID to update
+	 * @param dto the update payload containing fields to modify
+	 * @return UserResponse DTO with the updated user information
+	 * @throws NotFoundException           if user doesn't exist
+	 * @throws EmailAlreadyExistsException if new email is already in use
 	 */
 	@PutMapping("/{id}")
 	public UserResponse updateUser(@PathVariable Integer id, @RequestBody @Valid UserUpdateRequest dto) {
@@ -100,6 +127,13 @@ public class UserController {
 
 	/**
 	 * Update password for a user.
+	 * 
+	 * @param id      the user ID whose password to change
+	 * @param oldPass the current password for verification
+	 * @param newPass the new password to set
+	 * @throws NotFoundException     if user doesn't exist
+	 * @throws UnauthorizedException if old password is incorrect
+	 * @throws ValidationException   if new password doesn't meet requirements
 	 */
 	@PostMapping("/{id}/password")
 	public void updatePassword(@PathVariable Integer id, @RequestParam("old") @NotBlank String oldPass,
@@ -109,6 +143,12 @@ public class UserController {
 
 	/**
 	 * Delete a user by id. Authorization check is performed in the service layer.
+	 * 
+	 * @param req the HTTP request containing the Authorization header
+	 * @param id  the user ID to delete
+	 * @throws UnauthorizedException if authenticated user doesn't match the target
+	 *                               user
+	 * @throws NotFoundException     if user doesn't exist
 	 */
 	@DeleteMapping("/{id}")
 	public void deleteUser(HttpServletRequest req, @PathVariable Integer id) {

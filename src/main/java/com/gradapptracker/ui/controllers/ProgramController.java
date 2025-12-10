@@ -140,6 +140,11 @@ public class ProgramController {
     // Internal state
     private ProgramDTO selectedProgram;
 
+    /**
+     * Initialize the controller after FXML components are loaded.
+     * Sets up table columns, status dropdown, document combo box,
+     * and loads initial data from backend.
+     */
     @FXML
     public void initialize() {
         // Setup table columns

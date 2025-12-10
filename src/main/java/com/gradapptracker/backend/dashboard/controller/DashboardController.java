@@ -28,6 +28,12 @@ public class DashboardController {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Extract the authenticated user ID from the JWT token in the request header.
+     * 
+     * @param req the HTTP request containing the Authorization header
+     * @return the user ID extracted from the JWT token, or null if extraction fails
+     */
     private Integer extractUserId(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         String token = (auth != null && auth.startsWith("Bearer ")) ? auth.substring(7) : auth;
@@ -37,10 +43,14 @@ public class DashboardController {
     /**
      * Get dashboard statistics for the authenticated user.
      * Returns aggregated data including total programs, documents, active
-     * applications,
-     * and program status counts for 3D visualization.
+     * applications, and program status counts for 3D visualization.
      * 
-     * @return DashboardStatsDTO containing aggregated statistics
+     * @param req the HTTP request containing the Authorization header with JWT
+     *            token
+     * @return ResponseEntity containing DashboardStatsDTO with aggregated
+     *         statistics
+     * @throws UnauthorizedException if user is not authenticated or token is
+     *                               invalid
      */
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDTO> getDashboardStats(HttpServletRequest req) {

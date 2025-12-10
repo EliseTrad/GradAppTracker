@@ -130,6 +130,11 @@ public class DocumentController {
 
     private File selectedFile;
 
+    /**
+     * Initialize the controller after FXML components are loaded.
+     * Sets up table columns with preview thumbnails, configures form state,
+     * and loads initial document data from backend.
+     */
     @FXML
     public void initialize() {
         // Setup table columns

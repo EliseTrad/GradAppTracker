@@ -20,10 +20,34 @@ public final class AsyncUtils {
     private AsyncUtils() {
     }
 
+    /**
+     * Execute background work and handle callbacks on the JavaFX Application
+     * Thread.
+     * 
+     * @param <T>       the return type of the background work
+     * @param work      the callable to execute in background thread
+     * @param onSuccess callback executed on JavaFX thread if work succeeds,
+     *                  receives the result
+     * @param onError   callback executed on JavaFX thread if work fails, receives
+     *                  the exception
+     */
     public static <T> void run(Callable<T> work, Consumer<T> onSuccess, Consumer<Throwable> onError) {
         run(work, onSuccess, onError, null);
     }
 
+    /**
+     * Execute background work with callbacks and a finally block on the JavaFX
+     * Application Thread.
+     * 
+     * @param <T>       the return type of the background work
+     * @param work      the callable to execute in background thread
+     * @param onSuccess callback executed on JavaFX thread if work succeeds,
+     *                  receives the result
+     * @param onError   callback executed on JavaFX thread if work fails, receives
+     *                  the exception
+     * @param onFinally runnable always executed on JavaFX thread after success or
+     *                  error
+     */
     public static <T> void run(Callable<T> work, Consumer<T> onSuccess, Consumer<Throwable> onError,
             Runnable onFinally) {
         Task<T> task = new Task<>() {
@@ -62,6 +86,10 @@ public final class AsyncUtils {
         EXEC.submit(task);
     }
 
+    /**
+     * Thread factory that creates daemon threads for background work.
+     * Daemon threads don't prevent JVM shutdown.
+     */
     private static class DaemonThreadFactory implements ThreadFactory {
         private final ThreadFactory delegate = Executors.defaultThreadFactory();
 

@@ -29,6 +29,13 @@ public final class AlertUtils {
         // utility
     }
 
+    /**
+     * Create an information alert dialog.
+     * 
+     * @param title   the dialog title
+     * @param message the information message to display
+     * @return configured Alert instance (not yet shown)
+     */
     public static Alert info(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -37,6 +44,13 @@ public final class AlertUtils {
         return alert;
     }
 
+    /**
+     * Show an error alert dialog.
+     * Ensures the alert is shown on the JavaFX Application Thread.
+     * 
+     * @param title   the dialog title
+     * @param message the error message to display
+     */
     public static void error(String title, String message) {
         runOnFxThread(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -47,6 +61,13 @@ public final class AlertUtils {
         });
     }
 
+    /**
+     * Show a warning alert dialog.
+     * Ensures the alert is shown on the JavaFX Application Thread.
+     * 
+     * @param title   the dialog title
+     * @param message the warning message to display
+     */
     public static void warn(String title, String message) {
         runOnFxThread(() -> {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -57,46 +78,71 @@ public final class AlertUtils {
         });
     }
 
+    /**
+     * Show an error alert with message parsed from backend response.
+     * Extracts user-friendly error messages from JSON responses or validation
+     * errors.
+     * 
+     * @param rawMessage the raw error message or JSON from backend
+     */
     public static void errorFromBackend(String rawMessage) {
         String friendlyMessage = parseBackendError(rawMessage);
         error("Error", friendlyMessage);
     }
 
+    /**
+     * Parse backend error response and extract user-friendly message.
+     * Handles JSON error responses with "message" field and/or "errors" array
+     * containing field-level validation errors.
+     * 
+     * @param raw the raw error response from backend
+     * @return user-friendly error message
+     */
     private static String parseBackendError(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
-            return "Unknown error";
+            return "An error occurred. Please try again.";
         }
-        // Extract JSON part if present
+
+        // Extract JSON part if present (strip Java exception prefix)
         String jsonPart = raw;
         int colonIndex = raw.lastIndexOf(": ");
-        if (colonIndex != -1) {
+        if (colonIndex != -1 && raw.substring(colonIndex + 2).trim().startsWith("{")) {
             jsonPart = raw.substring(colonIndex + 2);
         }
+
         try {
-            // Try to parse as JSON
+            // Try to parse as JSON from backend
             Map<String, Object> json = mapper.readValue(jsonPart, new TypeReference<Map<String, Object>>() {
             });
             String message = (String) json.get("message");
             @SuppressWarnings("unchecked")
             List<Map<String, String>> errors = (List<Map<String, String>>) json.get("errors");
+
+            // If there are field-level validation errors, format them nicely
             if (errors != null && !errors.isEmpty()) {
-                StringBuilder sb = new StringBuilder(message != null ? message : "Validation failed");
-                sb.append(": ");
+                StringBuilder sb = new StringBuilder();
+                if (message != null && !message.isEmpty()) {
+                    sb.append(message).append(":\n");
+                }
                 for (Map<String, String> error : errors) {
                     String field = error.get("field");
                     String msg = error.get("message");
                     if (field != null && msg != null) {
-                        sb.append(field).append(" ").append(msg).append("; ");
+                        sb.append("• ").append(field).append(": ").append(msg).append("\n");
                     }
                 }
-                return sb.toString().replaceAll("; $", "");
+                return sb.toString().trim();
             } else if (message != null) {
+                // Backend provided a clean message, trust it
                 return message;
             }
         } catch (Exception e) {
-            // Not JSON, return as is
+            // Not JSON from backend, this is a frontend error
+            return "An error occurred. Please try again.";
         }
-        return raw;
+
+        // Fallback for unexpected format
+        return "An error occurred. Please try again.";
     }
 
     /**
@@ -131,6 +177,13 @@ public final class AlertUtils {
         return result.get();
     }
 
+    /**
+     * Display a confirmation dialog with OK and Cancel buttons.
+     * 
+     * @param title   the dialog title
+     * @param message the confirmation message
+     * @return true if OK was pressed, false if Cancel or dialog was closed
+     */
     private static boolean showConfirmDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
@@ -146,6 +199,13 @@ public final class AlertUtils {
         return res.filter(buttonType -> buttonType == ok).isPresent();
     }
 
+    /**
+     * Execute a runnable on the JavaFX Application Thread.
+     * If already on the JavaFX thread, runs immediately. Otherwise, uses
+     * Platform.runLater.
+     * 
+     * @param r the runnable to execute
+     */
     private static void runOnFxThread(Runnable r) {
         if (Platform.isFxApplicationThread()) {
             r.run();
@@ -284,18 +344,7 @@ public final class AlertUtils {
             return;
         }
 
-        // Check for authentication issues
-        if (message.contains("User not authenticated") ||
-                message.contains("not logged in") ||
-                message.contains("Session expired") ||
-                message.contains("Token expired") ||
-                message.contains("Unauthorized") ||
-                message.contains("userId could not be converted")) {
-            handleAuthError(ex);
-            return;
-        }
-
-        // Check for connection issues
+        // Check for connection issues (frontend error)
         if (message.contains("Connection") ||
                 message.contains("timeout") ||
                 message.contains("refused") ||
@@ -304,14 +353,13 @@ public final class AlertUtils {
             return;
         }
 
-        // For validation errors, try to use errorFromBackend which can parse structured
-        // errors
-        if (message.contains("validation") || message.contains("invalid") || message.contains("{")) {
+        // If message contains JSON or is from backend, trust it
+        if (message.contains("{") || message.contains("status")) {
             errorFromBackend(message);
             return;
         }
 
-        // Default generic message
+        // Default generic message for frontend errors
         handleOperationError(operation, itemType);
     }
 }

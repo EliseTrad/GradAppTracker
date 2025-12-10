@@ -36,12 +36,23 @@ public class WelcomeController {
     @FXML
     private PasswordField txtRegisterPassword;
 
+    /**
+     * Initialize the controller after FXML components are loaded.
+     * Sets the login tab as the default active tab and configures Enter key
+     * handlers.
+     */
     @FXML
     public void initialize() {
         authTabPane.getSelectionModel().select(loginTab);
         setupEnterKeyHandlers();
     }
 
+    /**
+     * Handle user login action.
+     * Validates credentials via backend API, stores session on success,
+     * shows navigation panel, and navigates to the main dashboard.
+     * Displays error message if login fails.
+     */
     @FXML
     private void onLogin() {
         // Trim input to avoid blank/whitespace errors
@@ -59,6 +70,12 @@ public class WelcomeController {
         }
     }
 
+    /**
+     * Handle user registration action.
+     * Creates a new user account via backend API, then automatically logs in
+     * the new user on success. Navigates to the main dashboard after successful
+     * registration and login. Displays error message if registration fails.
+     */
     @FXML
     private void onRegister() {
         // Trim input to avoid blank/whitespace errors
@@ -90,16 +107,29 @@ public class WelcomeController {
         }
     }
 
+    /**
+     * Switch to the registration tab.
+     * Called when user clicks the "Create Account" link from the login tab.
+     */
     @FXML
     private void onSwitchToRegister() {
         authTabPane.getSelectionModel().select(registerTab);
     }
 
+    /**
+     * Switch to the login tab.
+     * Called when user clicks the "Sign In" link from the registration tab.
+     */
     @FXML
     private void onSwitchToLogin() {
         authTabPane.getSelectionModel().select(loginTab);
     }
 
+    /**
+     * Configure Enter key press handlers for password fields.
+     * Pressing Enter in the login password field triggers login,
+     * and pressing Enter in the registration password field triggers registration.
+     */
     private void setupEnterKeyHandlers() {
         if (txtLoginPassword != null)
             txtLoginPassword.setOnAction(e -> onLogin());

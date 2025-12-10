@@ -23,7 +23,7 @@
       <VBox styleClass="auth-container" spacing="8" maxWidth="550" prefWidth="550">
 
         <!-- TabPane for Login/Register -->
-        <TabPane fx:id="authTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="auth-tabpane" prefHeight="320" minHeight="280">
+        <TabPane fx:id="authTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="auth-tabpane" prefHeight="380" minHeight="350">
 
           <!-- Login Tab -->
           <Tab text="Login" fx:id="loginTab">
